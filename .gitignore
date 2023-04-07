@@ -1,6 +1,4 @@
-/.env
-/history.json
-/log.json
-/main.py
-/xkarasb.session
-/.gitignore
+.env
+.gitignore
+__pycache__/
+venv/
