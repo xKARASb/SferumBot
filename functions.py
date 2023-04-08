@@ -1,6 +1,10 @@
-import requests
+import requests, os
+from dotenv import load_dotenv
+from cryptography.fernet import Fernet
 
+load_dotenv()
 
+key = (os.getenv("KEY")).encode("utf-8")
 
 def get_members(events, user) -> None:
     for el in events:
@@ -16,5 +20,12 @@ def get_members(events, user) -> None:
 
 
 
-def encode_cookie(cookie) -> str:
-  pass
+def encrypt_cookie(cookie: str) -> str:
+  fernet = Fernet(key)
+  encrypted = fernet.encrypt(cookie.encode()).decode()
+  return encrypted
+
+def decrypt_cookie(encryp_cookie: str) -> str:
+  fernet = Fernet(key)
+  dectex = fernet.decrypt(encryp_cookie.encode()).decode()
+  return dectex
