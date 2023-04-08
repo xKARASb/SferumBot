@@ -16,11 +16,6 @@ class User(Base):
         self.peer = peer
         self.chat_id = chat_id
 
-    def __repr__(self) -> dict:
-        info: dict = {
-            "id": self.id,
-            "cookie": self.cookie,
-            "peer": self.peer,
-            "chat_id": self.chat_id
-        }
+    def __repr__(self) -> str:
+        info: str = f"id: {self.id}, cookie: {self.cookie}, peer: {self.peer}, chat_id: {self.chat_id}"
         return info

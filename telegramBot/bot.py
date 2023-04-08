@@ -1,4 +1,4 @@
-import os, asyncio
+import os, asyncio, re
 from dotenv import load_dotenv
 from sqlalchemy.sql import exists
 
@@ -52,7 +52,7 @@ async def cookie(msg: Message):
                     cookie = tokens[1]
                     db_cookie = encrypt_cookie(cookie)
                     session = connect_db()
-                    if session.query(exists().where(User.id == msg.from_id)).scalar():
+                    if not session.query(User).filter(User.id==msg.from_id).first():
                         session.add(User(msg.from_id, db_cookie, None, None))
                         await bot.send_message(msg.from_id, "Аунтификация настроена!")
                     else:
@@ -82,15 +82,65 @@ __Инструкция как получить нужный cookie файл__:
         
 @dp.message_handler(commands=["sferum"])
 async def sferum(msg: Message):
-    pass
+    tokens = msg.get_args().split(" ")
+    if tokens:
+        match tokens[0]:
+            case "set":
+                if len(tokens) == 2:
+
+                    peer = tokens[1]
+                    pattern = re.compile(r"(https://web.vk.me/#/convo/)(-?\d{9,10})") #Можно было сделать спилитом, но так интеерснее Эта регулярка отедляет peer от остльного пути, позваляя нам спокойно получить peer - чат id в Сферуме
+                    peer = pattern.match(peer).group(2)
+                    session = connect_db()
+                    if not session.query(User).filter(User.id==msg.from_id).first():
+                        session.add(User(msg.from_id, None, peer, None))
+                        await bot.send_message(msg.from_id, "Peer настроен!")
+                    else:
+                        user = session.query(User).filter(User.id==msg.from_id).first()
+                        user.peer = peer
+                        await bot.send_message(msg.from_id, "Peer обновлён!")
+                    session.commit()
+                    session.close()
+                    return
+                else:
+                    await bot.send_message(msg.from_id, "Peer не корректен!", reply_markup=ReplyKeyboardRemove())
+                    return
+            case _:
+                pass
+    instruction = "Тебе нужно отправить ссылку на чат в комманде _/sferum set \<ссылка\>_, из которого ты хочешь получать сообщения в Сферуме\!"
+    await bot.send_message(msg.from_id, instruction, parse_mode="Markdownv2")
+
+@dp.message_handler(commands=["channel"])
+async def telegram(msg: Message):
+    tokens = msg.get_args().split(" ")
+    if tokens:
+        match tokens[0]:
+            case "set":
+                session = connect_db()
+                if not session.query(User).filter(User.id==msg.from_id).first():
+                    session.add(User(msg.from_id, None, None, msg.chat.id))
+                else:
+                    user = session.query(User).filter(User.id==msg.from_id).first()
+                    user.chat_id = msg.chat.id
+                session.commit()
+                session.close()
+                await bot.send_message(msg.chat.id, "Этот канал установлен для сообщений из Сферума!")
+                return
+    instruction = "Что бы установить канал, тебе нужно прописать команду /channel set, в нужном чате где есть бот!"
+    await bot.send_message(msg.chat.id, instruction)
+
+@dp.message_handler(commands=["test"])
+async def test(msg: Message):
+    tokens = msg.get_args().split(" ")
+    session = connect_db()
+    chnl_id = session.query(User).filter(User.id == msg.from_id).first().chat_id
+    await bot.send_message(chnl_id, tokens[0])
 
 async def send_vk_message():
-    pass
+    session = connect_db()
+#    chnl_id = session.query(User).filter(User.id == msg.from_id).first().chat_id
 
 
 def start_bot():
     executor.start_polling(dp, skip_updates=True)
 
-    
-
-#asyncio.run(bot.send_message(-1001917922644, "Пук"))
