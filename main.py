@@ -12,4 +12,4 @@ if __name__ == "__main__":
 
     #asyncio.run(send_photo(-1001917922644, "https://sun9-35.userapi.com/impg/dtcSfuO-AJkXYckk4bXwlPB8W-Mmeok5xUy-Mg/kAkLZ_y_-P0.jpg?size=510x511&quality=95&sign=f843558b969b650f95c0b0bccbaf17a6&c_uniq_tag=kEInpB4XUGgLMaZn44Ugys8oLjVEeJY4WP5XRvtX3JA&type=album", "Брбрбрбр"))
 
-    
+        

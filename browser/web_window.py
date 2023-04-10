@@ -3,12 +3,20 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService # Similar thing for firefox also!
 from subprocess import CREATE_NO_WINDOW
 
+from dotenv import load_dotenv
+import os
+
 from functions.functions import decrypt_cookie, chek_cookie, get_members
 from telegramBot.messages import (
   error_message_cookie_invalid,
-  send_photo,
-  send_messages
+  send_media,
+  send_messages,
+  send_photo
 )
+
+load_dotenv()
+
+bot_token = os.getenv("BOT_TOKEN")
 
 import time, json, ast, requests
 
@@ -21,9 +29,11 @@ options = webdriver.ChromeOptions()
 options.add_experimental_option("excludeSwitches",["ignore-certificate-errors"])
 options.add_argument('--log-level=3')
 options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 OPR/97.0.0.0")
-#options.add_argument('remote-debugging-port=9222')
+#ptions.add_argument('remote-debugging-port=9222')
 options.add_argument("--headless")
 options.add_argument('--disable-gpu')
+prefs = {'download.default_directory' : 'D:\\works\\coding\\python\\sferum\\video'}
+options.add_experimental_option('prefs', prefs)
 options.add_argument('disable-infobars')
 options.add_argument("--disable-extensions")
 hrome_service = ChromeService()
@@ -58,12 +68,19 @@ def fwd_message(profiles, el, tg_id,  text = '') -> str:
   
 
 
-def media_message(el, tg_id, text):
+def media_message(el):
+  urls = []
+  videos = []
   for attach in el["attachments"]:
-    if attach["type"] == "photo": 
-      img_url = attach["photo"]["sizes"][len(attach["photo"]["sizes"])-1]["url"]
-      send_photo(tg_id, img_url, text)
-      return img_url
+    match attach["type"]:
+      case "photo":
+        media_url = attach["photo"]["sizes"][len(attach["photo"]["sizes"])-1]["url"]
+        urls.append((attach["type"], media_url))
+      case "video":
+        media_url = attach["video"]["player"]
+        videos.append(f'({media_url})')
+
+  return urls, videos
     
 def web_window(cookie, user_id, peer, vk_id):
     cookie = cookie
@@ -100,8 +117,6 @@ def web_window(cookie, user_id, peer, vk_id):
                     user_id = resp["body"]["updates"][0][7]["from"]
                     epoch_time = resp["body"]["updates"][0][5]
                     sender = "Unknown"
-                    print(resp["body"]["updates"][0][7], type(resp["body"]["updates"][0][7]))
-                    print(user_id)
                     for member in get_members(vk_id):
                       print(member)
                       if member["id"] == int(user_id):
@@ -119,12 +134,19 @@ def web_window(cookie, user_id, peer, vk_id):
                 text = el["text"]
                 sender = "Unknown"
                 for member in resp["body"]["response"]["profiles"]:
-                  print(member)
                   if member["id"] == int(user_id):
                     sender = f'{member["first_name"]} {member["last_name"]}'
                 if el.get("fwd_messages", False):
                   text = fwd_message(resp["body"]["response"]["profiles"], el,tg_id,text)
                   send_messages(tg_id, '', text)
                 elif el["attachments"]:
-                  media_message(el, tg_id, text)
-                  
+                  urls = media_message(el)
+                  video = None  
+                  if urls[1]:
+                    video = f"[Видео]{' [Видео]'.join(urls[1])}"
+                    send_messages(tg_id, sender, text, video)
+                  if urls[0]:
+                    if len(urls[0]) > 1:
+                      send_media(tg_id, urls[0])
+                    else:
+                      send_photo(tg_id, sender, urls[0][0][1])
