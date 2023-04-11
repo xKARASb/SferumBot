@@ -34,8 +34,6 @@ bot_token = os.getenv("BOT_TOKEN")
 bot = Bot(bot_token)
 dp = Dispatcher(bot)
 
-#def add_connection(user_id):
-
 
 
 @dp.message_handler(commands=['start'])
@@ -184,10 +182,6 @@ async def test(msg: Message):
     session = connect_db()
     chnl_id = session.query(User).filter(User.id == msg.from_id).first().chat_id
     await bot.send_message(chnl_id, tokens[0])
-
-async def send_vk_message():
-    session = connect_db()
-#    chnl_id = session.query(User).filter(User.id == msg.from_id).first().chat_id
 
 
 def start_bot():

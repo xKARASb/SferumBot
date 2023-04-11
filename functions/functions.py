@@ -67,22 +67,26 @@ def get_members(vk_id) -> None:
   return resp.json()["response"]["profiles"]
 
 
-
+#Шифрование куки
 def encrypt_cookie(cookie: str) -> str:
   fernet = Fernet(key)
   encrypted = fernet.encrypt(cookie.encode()).decode()
   return encrypted
 
+#Дешифрование куки
 def decrypt_cookie(encryp_cookie: str) -> str:
   fernet = Fernet(key)
   dectex = fernet.decrypt(encryp_cookie.encode()).decode()
   return dectex
 
+#Обработка текста для отправки в телеграм
 def message_text_validate(text: str):
   validate_text = []
   
+  text = "\n".join(text.split("<br>"))
+
   for char in text:
-    if char in ('_', '*', '[', ']', '(', ')', '~', '`', '#', '+', '-', '=', '|', '{', '}', '.', '!'):
+    if char in ('_', '*', '[', ']', '(', ')', '~', '`', '#', '+', '-', '=', '|', '{', '}', '.', '!', ">"):
       validate_text.append("\\")
     validate_text.append(char)
   return "".join(validate_text)
