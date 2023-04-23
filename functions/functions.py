@@ -27,7 +27,7 @@ def chek_cookie(cookie) -> dict:
   return {"id": id}
 
 
-
+#VK API
 def get_user_id(cookie) -> int:
   cookies = {
     "remixdsid": cookie
@@ -40,7 +40,7 @@ def get_user_id(cookie) -> int:
   resp = requests.get("https://web.vk.me/", params=params, cookies=cookies).json()
   id = resp[0]["user_id"]
   return id 
-
+#VK API
 def get_access_token(cookie) -> str:
   cookies = {
     "remixdsid": cookie
@@ -54,6 +54,7 @@ def get_access_token(cookie) -> str:
   access_token = resp[0]["access_token"]
   return access_token
 
+# VK API
 def get_members(vk_id) -> None:
   session = connect_db()
   user_db = session.query(User).filter(User.vk_id==vk_id).first()

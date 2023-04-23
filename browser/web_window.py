@@ -9,11 +9,12 @@ from telegramBot.messages import (
   error_message_cookie_invalid,
   send_media,
   send_messages,
-  send_photo
+  send_photo,
+  send_doc
 )
 
 
-import time, json, ast, requests
+import time, json, ast, requests, logging
 
 TIME_UPDATE = 5
 
@@ -57,11 +58,16 @@ def fwd_message(profiles, el, text = None, count = 0):
       raw_media = media_message(i)
       if raw_media[0]:
         media[0] += raw_media[0]
-        for i in range(len(raw_media[0])):
-          text = f'{text} *фото*'
+        print(raw_media[0])
+        for attachment in raw_media[0]:
+          match attachment[0]:
+            case "doc":
+              text = f'{text} *документ*'
+            case "photo":
+              text = f'{text} *фото*'
       if raw_media[1]:
         media[1] += raw_media[1]
-        for i in range(len(raw_media[0])):
+        for k in range(len(raw_media[1])):
           text = f'{text} *видео*'
 
     if i.get("fwd_messages", False):
@@ -71,11 +77,8 @@ def fwd_message(profiles, el, text = None, count = 0):
       media[1]+= raw_media[1]
       fwd_messages = raw_data[0]
     msg = f"{'  '*count}{sender}\n  {''.join(fwd_messages)}"
-    print(media)
     if text:
-      
       msg = f"{' '*count}{sender}\n  {'  '*(count+1)}{''.join(text)}\n  {''.join(fwd_messages)} "
-
 
     all_messages.append(msg)
     
@@ -94,6 +97,11 @@ def media_message(el):
       case "video":
         media_url = attach["video"]["player"]
         videos.append(f'({media_url})')
+      case "doc":
+        media_url = attach["doc"]["url"]
+        media_title = attach["doc"]["title"]
+        print(media_url)
+        urls.append((attach["type"], media_url, media_title))
 
   return urls, videos
     
@@ -116,6 +124,8 @@ def web_window(cookie, user_id, peer, vk_id):
     driver.get("https://web.vk.me")
     driver.add_cookie({"name": "remixdsid", "value": cookie, "domain":"web.vk.me", "path":"/", "secure": True})
     driver.refresh()
+
+    send_messages(tg_id, "Системное оповещение", "Бот подключён!")
 
     #основной поток обработки сообщений сферума
     while True:
@@ -158,7 +168,6 @@ def web_window(cookie, user_id, peer, vk_id):
                   text_fwd = fwd_message(resp["body"]["response"]["profiles"], el)
 
                   message = f" {text} \n {''.join(text_fwd[0])}"
-                  print(text_fwd[1])
                   video = None
                   if text_fwd[1][1]:
                     video = f"[Видео]{' [Видео]'.join(text_fwd[1][1])}"
@@ -179,9 +188,13 @@ def web_window(cookie, user_id, peer, vk_id):
                     if len(urls[0]) > 1:
                       send_media(tg_id, urls[0])
                     else:
-                      send_photo(tg_id, sender, urls[0][0][1])
+                      match urls[0][0][0]:
+                        case 'photo':
+                          send_photo(tg_id, sender, urls[0][0][1])
+                        case "doc":
+                          send_doc(tg_id, urls[0][0][2], urls[0][0][1])
   except Exception as e:
     driver.quit()
-    print(e)
+    logging.exception("Browser error")
 
     web_window(cookie, tg_id, peer, vk_id)
