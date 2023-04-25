@@ -1,8 +1,6 @@
-import os, asyncio, json, re
+import os, asyncio, json, re, logging, sys
 
 from multiprocessing import Process
-
-from dotenv import load_dotenv
 
 from functions.functions import (
     encrypt_cookie,
@@ -30,8 +28,6 @@ from aiogram.types import (
     KeyboardButton,
     InlineQuery
 )   
-
-load_dotenv()
 
 bot_token = os.getenv("BOT_TOKEN")
 bot = Bot(bot_token, parse_mode="HTML")
@@ -78,25 +74,49 @@ async def start_handling(msg: Message):
             await bot.send_message(msg.from_user.id, "Вы не установили чат прослушки (peer)! Используйте /peer для подробностей")
             return
         else:
-            with open("autoconnect/pool.json", "r") as f:
+            with open("autoconnect/active_pool.json", "r") as f:
                 data = json.load(f)
-            if msg.from_user.id in data:
+            if data.get(str(msg.from_user.id), False):
                 await msg.reply("Бот уже активирован!")
                 return
             
             cookie = decrypt_cookie(cookie)
 
-            data.append(msg.from_user.id)
+            task = Process(target=web_window, args=(cookie, msg.from_user.id, peer, vk_id))
             #data[0].append([cookie, msg.from_user.id, peer, vk_id])
-            with open("autoconnect/pool.json", "w") as f:
+            with open("autoconnect/active_pool.json", "w") as f:
                 json.dump(data, f)
             #Call web windown
-            task = Process(target=web_window, args=(cookie, msg.from_user.id, peer, vk_id))
+            task.daemon = True
             task.start()
-            pass
+            data.update({str(msg.from_user.id):task.pid})
+            logging.info(f"NEW WINDOW pid: {task.pid}")
+            with open("autoconnect/pool.json", "r") as f:
+                data = json.load(f)
+            data.append(msg.from_user.id)
+            with open("autoconnect/pool.json", "w") as f:
+                json.dump(data, f)
 
     else:
         await bot.send_message(msg.from_user.id, "Вы не настроили бота!")
+
+@router.message(Command(commands=["stop"]))
+async def stop(msg: Message):
+    with open("autoconnect/active_pool.json") as f:
+        data = json.load(f)
+    if data.get(str(msg.from_user.id), False):
+        data.pop(str(msg.from_user.id))
+        with open("autoconnect/active_pool.json", "w") as f:
+            json.dump(data, f)
+        with open("autoconnect/pool.json") as f:
+            data = json.load(f)
+        data.pop(msg.from_user.id)
+        with open("autoconnect/pool.json", "w") as f:
+            json.dump(data, f)
+
+        os.kill(data[str(msg.from_user.id)], 15)
+        await msg.reply("Бот остановлен!")
+    await msg.reply("Бот не включён, что бы его выключить!")
 
 
 @router.message(Command(commands=["cookie"]))

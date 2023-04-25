@@ -1,7 +1,8 @@
+import logging
+
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService # Similar thing for firefox also!
-from subprocess import CREATE_NO_WINDOW
+from selenium.webdriver.chrome.service import Service as ChromeService
 
 
 from functions.functions import decrypt_cookie, chek_cookie, get_members
@@ -14,7 +15,15 @@ from telegramBot.messages import (
 )
 
 
-import time, json, ast, requests, logging
+import time, json, ast, requests, logging, os, signal, sys
+
+driver_path = os.getenv('PATH')
+
+logger = logging.getLogger('urllib3.connectionpool')
+logger.setLevel(logging.INFO)
+
+logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
+logger.setLevel(logging.WARNING)
 
 TIME_UPDATE = 5
 
@@ -24,17 +33,40 @@ options = webdriver.ChromeOptions()
 
 options.add_experimental_option("excludeSwitches",["ignore-certificate-errors"])
 options.add_argument('--log-level=3')
+options.add_argument("disable-logging")
 options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 OPR/97.0.0.0")
 #ptions.add_argument('remote-debugging-port=9222')
 options.add_argument("--headless")
 options.add_argument('--disable-gpu')
-prefs = {'download.default_directory' : 'D:\\works\\coding\\python\\sferum\\video'}
-options.add_experimental_option('prefs', prefs)
 options.add_argument('disable-infobars')
 options.add_argument("--disable-extensions")
 hrome_service = ChromeService()
-hrome_service.creationflags = CREATE_NO_WINDOW
 
+class GracefulKiller:
+  kill_now = False
+  def __init__(self, tg_id):
+    self.tg_id = tg_id
+    signal.signal(signal.SIGINT, self.exit_int)
+    signal.signal(signal.SIGTERM, self.exit_term)
+
+  def exit_int(self, *args):
+    self.kill_now = True
+    send_messages(self.tg_id, "Системное оповещение", "Обработчик сферума пошёл спать по плану((")
+    with open("autoconnect/active_pool.json", "r") as f:
+      data = json.load(f)
+    data.pop(str(self.tg_id))
+    with open("autoconnect/active_pool.json", "w") as f:
+      json.dump(data, f)
+
+  def exit_term(self, *args):
+    send_messages(self.tg_id, "Системное оповещение", "Обработчик сферума пошёл спать((")
+    self.kill_now = True
+    print("Killing...")
+    with open("autoconnect/active_pool.json", "r") as f:
+      data = json.load(f)
+    data.pop(str(self.tg_id))
+    with open("autoconnect/active_pool.json", "w") as f:
+      json.dump(data, f)
 
 def process_browser_log_entry(entry):
     response = json.loads(entry['message'])['message']
@@ -58,7 +90,6 @@ def fwd_message(profiles, el, text = None, count = 0):
       raw_media = media_message(i)
       if raw_media[0]:
         media[0] += raw_media[0]
-        print(raw_media[0])
         for attachment in raw_media[0]:
           match attachment[0]:
             case "doc":
@@ -110,12 +141,14 @@ def web_window(cookie, user_id, peer, vk_id):
   tg_id = user_id
   vk_id = vk_id
   peer = peer
+
+  killer = GracefulKiller(tg_id)
   try:   
-    driver = webdriver.Chrome(executable_path="D:\\works\\coding\\python\\sferum\\driver\\chromedriver.exe", options=options, desired_capabilities=caps, service=hrome_service)
+    driver = webdriver.Chrome(executable_path=driver_path, options=options, desired_capabilities=caps, service=hrome_service)
     #self.message_handler()
-  
+
     if chek_cookie(cookie).get("error", False):
-      print("erroir")
+      logging.warning(f"Bad cookie\n User: {tg_id}")
       driver.quit()
       driver.close()
       error_message_cookie_invalid(tg_id)
@@ -124,11 +157,10 @@ def web_window(cookie, user_id, peer, vk_id):
     driver.get("https://web.vk.me")
     driver.add_cookie({"name": "remixdsid", "value": cookie, "domain":"web.vk.me", "path":"/", "secure": True})
     driver.refresh()
-
     send_messages(tg_id, "Системное оповещение", "Бот подключён!")
 
-    #основной поток обработки сообщений сферума
-    while True:
+      #основной поток обработки сообщений сферума
+    while not killer.kill_now:
       time.sleep(TIME_UPDATE)
       browser_log = driver.get_log('performance')
       events = [process_browser_log_entry(entry) for entry in browser_log]
@@ -143,14 +175,12 @@ def web_window(cookie, user_id, peer, vk_id):
                   if not resp["body"]["updates"][0][8]:
                     if resp["body"]["updates"][0][4] == peer:
                       user_id = resp["body"]["updates"][0][7]["from"]
-                      epoch_time = resp["body"]["updates"][0][5]
                       sender = "Unknown"
                       for member in get_members(vk_id):
                         if member["id"] == int(user_id):
                           sender = f'{member["first_name"]} {member["last_name"]}'
-
-                      date = requests.get(f'https://helloacm.com/api/unix-timestamp-converter/?cached&s={epoch_time}').json()
                       msg = resp["body"]["updates"][0][6]
+                      logging.info(f"NEW MESSAGE\n {sender}:{msg}")
                       send_messages(tg_id, sender, msg)
           # Обработка медиа и файлов
           elif el['params']["response"]["url"] == "https://api.vk.me/method/messages.getLongPollHistory?v=5.204":
@@ -163,10 +193,8 @@ def web_window(cookie, user_id, peer, vk_id):
                 for member in resp["body"]["response"]["profiles"]:
                   if member["id"] == int(user_id):
                     sender = f'{member["first_name"]} {member["last_name"]}'
-
                 if el.get("fwd_messages", False):
                   text_fwd = fwd_message(resp["body"]["response"]["profiles"], el)
-
                   message = f" {text} \n {''.join(text_fwd[0])}"
                   video = None
                   if text_fwd[1][1]:
@@ -177,7 +205,6 @@ def web_window(cookie, user_id, peer, vk_id):
                       send_media(tg_id, text_fwd[1][0])
                     else:
                       send_photo(tg_id, sender, text_fwd[1][0][0][1])
-
                 elif el["attachments"]:
                   urls = media_message(el)
                   video = None  
@@ -193,8 +220,21 @@ def web_window(cookie, user_id, peer, vk_id):
                           send_photo(tg_id, sender, urls[0][0][1])
                         case "doc":
                           send_doc(tg_id, urls[0][0][2], urls[0][0][1])
-  except Exception as e:
+    
+    logging.info(f"Browser shootdown \n user id:{tg_id}")
     driver.quit()
-    logging.exception("Browser error")
 
-    web_window(cookie, tg_id, peer, vk_id)
+    sys.exit(1)
+  except Exception as e:
+    if not killer.kill_now:
+      driver.quit()
+      logging.error("Browser error")
+      logging.exception("error")
+
+      web_window(cookie, tg_id, peer, vk_id)
+    else:
+      send_messages(tg_id, "Системное оповещение", "Обработчик сферума пошёл спать((")  
+      logging.info(f"Browser shootdown \n user id:{tg_id}")
+      driver.quit()
+
+      sys.exit(1)

@@ -3,13 +3,19 @@ from telegramBot.bot import start_bot
 from autoconnect.wakeup import wake_up
 #from multiprocessing import Process
 import logging
+from dotenv import load_dotenv
+
 
 
 if __name__ == "__main__":
+    logging.basicConfig(filename='logs/info.log', encoding='utf-8', level=logging.INFO)
+
+    load_dotenv()
     create_db()
-    logging.info("Подключение пользователей...")
-    #task = Process(target=wake_up)
-    #task.start()
+
+    logging.info('\n'*15 + "New session")
+    logging.info("Connection to VK")
+
     wake_up()
-    logging.info("Подключение бота...")
+    logging.info("TG bot connect")
     start_bot()
