@@ -4,7 +4,6 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 
-
 from functions.functions import decrypt_cookie, chek_cookie, get_members
 from telegramBot.messages import (
   error_message_cookie_invalid,
@@ -23,7 +22,7 @@ logger = logging.getLogger('urllib3.connectionpool')
 logger.setLevel(logging.INFO)
 
 logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.INFO)
 
 TIME_UPDATE = 5
 
@@ -33,9 +32,9 @@ options = webdriver.ChromeOptions()
 
 options.add_experimental_option("excludeSwitches",["ignore-certificate-errors"])
 options.add_argument('--log-level=3')
-options.add_argument("disable-logging")
+#options.add_argument("disable-logging")
 options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 OPR/97.0.0.0")
-#ptions.add_argument('remote-debugging-port=9222')
+options.add_argument("--no-sandbox")
 options.add_argument("--headless")
 options.add_argument('--disable-gpu')
 options.add_argument('disable-infobars')
@@ -136,13 +135,14 @@ def media_message(el):
 
   return urls, videos
     
-def web_window(cookie, user_id, peer, vk_id):
+def web_window(cookie, user_id, peer, vk_id, handl = None):
   cookie = cookie
   tg_id = user_id
   vk_id = vk_id
   peer = peer
 
-  killer = GracefulKiller(tg_id)
+  killer = handl if handl else GracefulKiller(tg_id)
+
   try:   
     driver = webdriver.Chrome(executable_path=driver_path, options=options, desired_capabilities=caps, service=hrome_service)
     #self.message_handler()
@@ -156,9 +156,10 @@ def web_window(cookie, user_id, peer, vk_id):
     #аунтификация
     driver.get("https://web.vk.me")
     driver.add_cookie({"name": "remixdsid", "value": cookie, "domain":"web.vk.me", "path":"/", "secure": True})
+    driver.add_cookie({"name": "remixweb_vk_me_profile_type", "value":"2", "domain":"web.vk.me"})
     driver.refresh()
-    send_messages(tg_id, "Системное оповещение", "Бот подключён!")
 
+    send_messages(tg_id, "Системное оповещение", "Бот подключён!")
       #основной поток обработки сообщений сферума
     while not killer.kill_now:
       time.sleep(TIME_UPDATE)
@@ -187,6 +188,7 @@ def web_window(cookie, user_id, peer, vk_id):
             resp = driver.execute_cdp_cmd('Network.getResponseBody', {'requestId': el["params"]["requestId"]})
             resp["body"] = json.loads(resp["body"])
             for el in resp["body"]["response"]["messages"]["items"]:
+              logging.warning(f"RESP \n{resp}")
               if el["peer_id"] == peer:
                 text = el["text"]
                 user_id = el["from_id"]
@@ -224,7 +226,7 @@ def web_window(cookie, user_id, peer, vk_id):
     logging.info(f"Browser shootdown \n user id:{tg_id}")
     driver.quit()
 
-    sys.exit(1)
+    #sys.exit(1)
   except Exception as e:
     if not killer.kill_now:
       driver.quit()
@@ -233,8 +235,7 @@ def web_window(cookie, user_id, peer, vk_id):
 
       web_window(cookie, tg_id, peer, vk_id)
     else:
-      send_messages(tg_id, "Системное оповещение", "Обработчик сферума пошёл спать((")  
       logging.info(f"Browser shootdown \n user id:{tg_id}")
       driver.quit()
 
-      sys.exit(1)
+      #sys.exit(1)

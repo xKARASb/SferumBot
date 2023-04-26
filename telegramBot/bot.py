@@ -1,6 +1,8 @@
-import os, asyncio, json, re, logging, sys
+import os, asyncio, json, re, logging, sys, signal
 
 from multiprocessing import Process
+
+from autoconnect.wakeup import start_window
 
 from functions.functions import (
     encrypt_cookie,
@@ -11,8 +13,6 @@ from functions.functions import (
 from models.db import connect_db
 from models.user import User
 
-
-from browser.web_window import web_window
 
 from aiogram import Bot, Dispatcher, Router, F
 
@@ -80,17 +80,12 @@ async def start_handling(msg: Message):
                 await msg.reply("Бот уже активирован!")
                 return
             
-            cookie = decrypt_cookie(cookie)
-
-            task = Process(target=web_window, args=(cookie, msg.from_user.id, peer, vk_id))
-            #data[0].append([cookie, msg.from_user.id, peer, vk_id])
-            with open("autoconnect/active_pool.json", "w") as f:
-                json.dump(data, f)
             #Call web windown
-            task.daemon = True
-            task.start()
-            data.update({str(msg.from_user.id):task.pid})
-            logging.info(f"NEW WINDOW pid: {task.pid}")
+            await msg.reply("Бот запускается...")
+            task = start_window(msg.from_user.id, peer, chat_id, cookie, vk_id)
+            
+            logging.info(f"NEW WINDOW pid: {task}")
+
             with open("autoconnect/pool.json", "r") as f:
                 data = json.load(f)
             data.append(msg.from_user.id)
@@ -105,30 +100,32 @@ async def stop(msg: Message):
     with open("autoconnect/active_pool.json") as f:
         data = json.load(f)
     if data.get(str(msg.from_user.id), False):
+        pid = data.get(str(msg.from_user.id))
         data.pop(str(msg.from_user.id))
         with open("autoconnect/active_pool.json", "w") as f:
             json.dump(data, f)
         with open("autoconnect/pool.json") as f:
             data = json.load(f)
-        data.pop(msg.from_user.id)
+        data.pop(data.index(msg.from_user.id))
         with open("autoconnect/pool.json", "w") as f:
             json.dump(data, f)
 
-        os.kill(data[str(msg.from_user.id)], 15)
+        os.kill(pid, signal.SIGTERM)
         await msg.reply("Бот остановлен!")
-    await msg.reply("Бот не включён, что бы его выключить!")
+        return
+    await msg.reply("Бот не запущен, что бы его выключить!")
 
 
 @router.message(Command(commands=["cookie"]))
 async def cookie(msg: Message):
-    tokens = msg.text.split(" ")
+    tokens = msg.text.split(" ")[1:]
     if tokens:
-        match tokens[1]:
+        match tokens[0]:
             case "set":
-                if not len(tokens) == 3:
+                if not len(tokens) == 2:
                     await bot.send_message(msg.from_user.id, "Вы не ввели cookie!", reply_markup=ReplyKeyboardRemove())
                     return
-                cookie = tokens[2]
+                cookie = tokens[1]
                 vk_id = chek_cookie(cookie)
                 if vk_id.get("error", False):
                     await bot.send_message(msg.from_user.id, "Cookie не корректен!")

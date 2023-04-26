@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='logs/info.log', encoding='utf-8', level=logging.INFO)
+    logging.basicConfig(encoding='utf-8', level=logging.INFO) #filename='logs/info.log', 
 
     load_dotenv()
     create_db()

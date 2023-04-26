@@ -13,22 +13,18 @@ def wake_up():
     for user in users_pool:
         user = session.query(User).filter(User.id==user).first()
         if user:
-            tg_id = user.id
-            peer = user.peer
-            chat_id = user.chat_id
-            cookie = user.cookie
-            vk_id = user.vk_id
-            
-            cookie = decrypt_cookie(cookie)
-            task = Process(target=web_window, args=(cookie, tg_id, peer, vk_id))
-            task.daemon = True
-            task.start()
-            with open("autoconnect/active_pool.json", "r") as f:
-                data = json.load(f)
-            data.update({int(tg_id):task.pid})
-            with open("autoconnect/active_pool.json", "w") as f:
-                json.dump(data, f)
-            logging.info(f"NEW WINDOW pid: {task.pid}")
-    #with Pool(len(users_pool[0])+1) as pool:
-    #    pool.starmap(web_window, users_pool[0])
+            task = start_window(user.id, user.peer, user.chat_id, user.cookie, user.vk_id)
+            logging.info(f"AUTOCONNECT WINDOW pid: {task}")
+
+
+def start_window(tg_id, peer, chat_id, cookie, vk_id, handl = None):           
+    cookie = decrypt_cookie(cookie)
+    task = Process(target=web_window, args=(cookie, tg_id, peer, vk_id, handl))
+    task.start()
+    with open("autoconnect/active_pool.json", "r") as f:
+        data = json.load(f)
+    data.update({int(tg_id):task.pid})
+    with open("autoconnect/active_pool.json", "w") as f:
+        json.dump(data, f)
+    return task.pid
         

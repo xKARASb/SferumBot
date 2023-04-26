@@ -11,26 +11,28 @@ key = (os.getenv("KEY")).encode("utf-8")
 
 def chek_cookie(cookie) -> dict:
   cookies = {
-    "remixdsid": cookie
+    "remixdsid": cookie,
+    "remixweb_vk_me_profile_type": "2",
   }
   params = {
      "v": 5.204,
      "act": "web_token",
      "app_id": "8202606"
   } 
-  resp = requests.get("https://web.vk.me/", params=params, cookies=cookies).json()[0]
-  if resp.get("error", False):
+  resp = requests.get("https://web.vk.me/", params=params, cookies=cookies).json()
+  if resp[0].get("error", False):
     return {"error", True}
   
+  resp = resp[0] if resp[0].get("profile_type", 0) == 2 else resp[1]
+  
   id = resp["user_id"]
-
   return {"id": id}
-
 
 #VK API
 def get_user_id(cookie) -> int:
   cookies = {
-    "remixdsid": cookie
+    "remixdsid": cookie,
+    "remixweb_vk_me_profile_type": "2",
   }
   params = {
      "v": 5.204,
@@ -38,12 +40,14 @@ def get_user_id(cookie) -> int:
      "app_id": "8202606"
   } 
   resp = requests.get("https://web.vk.me/", params=params, cookies=cookies).json()
-  id = resp[0]["user_id"]
-  return id 
+  
+  resp = resp[0] if resp[0].get("profile_type", 0) == 2 else resp[1]
+  
+  return resp["user_id"]
 #VK API
 def get_access_token(cookie) -> str:
   cookies = {
-    "remixdsid": cookie
+    "remixdsid": cookie,
   }
   params = {
      "v": 5.204,
@@ -51,7 +55,9 @@ def get_access_token(cookie) -> str:
      "app_id": "8202606"
   } 
   resp = requests.get("https://web.vk.me/", params=params, cookies=cookies).json()
-  access_token = resp[0]["access_token"]
+  resp = resp[0] if resp[0].get("profile_type", 0) == 2 else resp[1]
+
+  access_token = resp["access_token"]
   return access_token
 
 # VK API
