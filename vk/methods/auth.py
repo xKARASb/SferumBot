@@ -13,5 +13,8 @@ def get_web_token(auth_cookie):
     cookies = {
         "remixdsid": auth_cookie,
     }
-    req = requests.post("https://web.vk.me/?act=web_token&app_id=8202606", cookies=cookies)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+    }
+    req = requests.get("https://web.vk.me/?act=web_token&app_id=8202606", cookies=cookies, headers=headers,  allow_redirects=False)
     return req.json()[1]["access_token"]
