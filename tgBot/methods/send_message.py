@@ -5,21 +5,12 @@ from vk.types import Message as VkMessage
 from aiogram.types import Message as TgMessage
 from aiogram.types import InputMediaPhoto, InputMediaDocument, InputMediaAudio
 
-def text_display(text: str) -> str:
-    validate_text = []
-
-    text = "\n".join(text.split("<br>"))
-
-    for char in text:
-        if char in ('_', '*', '[', ']', '(', ')', '~', '`', '#', '+', '-', '=', '|', '{', '}', '.', '!', ">"):
-            validate_text.append("\\")
-        validate_text.append(char)
-    return "".join(validate_text)
-
 def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
-    text_entites = []
+    text = msg.get_tg_text()
+    media = msg.media
     commands = []
-    if msg.media:
+
+    if media:
         types = {
         }
         #no pep8
@@ -28,14 +19,12 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
             "doc": InputMediaDocument,
             "audio": InputMediaAudio
         }
-        for attach in msg.media:
-            match attach[0]:
-                case "video":
-                    text_entites.append(f"[Видео {(len(text_entites)+1)}]({attach[1]})")
-                case _:
-                    types[attach[0]] = types.get(attach[0], [])
-                    types[attach[0]].append(InputMedia[attach[0]](media=attach[1], parse_mode="MarkdownV2"))
-        types[list(types.keys())[0]][0].caption = text_display(msg.text) + f"\n" + " ".join(text_entites)
+
+        for attach in media:
+            if attach[0] == "video": continue
+            types[attach[0]] = types.get(attach[0], [])
+            types[attach[0]].append(InputMedia[attach[0]](media=attach[1], parse_mode="MarkdownV2"))
+        types[list(types.keys())[0]][0].caption = text
         for i in types.keys():
             if len(types[i]) > 1:
                 args = {"media": types[i]}
@@ -49,12 +38,11 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
                     case "photo":
                         command = Bot.send_photo
                 kwargs = {types[i][0].type: types[i][0].media, "caption": types[i][0].caption, "parse_mode": "MarkdownV2"}
-                commands.append((kwargs, command))
-        return commands        
-
-
-
-    
+                commands.append((kwargs, command))  
+    else:
+        commands.append(({"text": text}, Bot.send_message))
+    print(text)
+    return commands
 
 async def send_message(bot: Bot, msg: VkMessage):
     commands = generate_tg_message(msg)
