@@ -1,27 +1,8 @@
-import requests
-from aiogram.types import BufferedInputFile
-
-def get_max_size_photo_url(attach) -> str: 
-    link = (0, 100)
-    lvls = ("w", "z", "y", "r", "q", "p", "o", "x", "m", "s")
-
-    for i in attach["sizes"]:
-      if lvls.index(i["type"]) < link[1]:
-         link = (i["url"], lvls.index(i["type"]))
-    return link[0]
-
-def get_source_link(attach) -> str:
-    req = requests.get(attach["url"])
-    if "text" in req.headers.get("Content-Type").split("/"): 
-        url = req.text[req.text.find("https:", req.text.find("docUrl")):req.text.find('",', req.text.find("docUrl"))]
-        req = requests.get(''.join(url.split("\\")))
-        if len(req.content) < 52428800: 
-            return BufferedInputFile(req.content, filename=req.url[req.url.rfind("/")+1:req.url.find("?")])
-    elif "application" in req.headers.get("Content-Type").split("/"):
-        return BufferedInputFile(req.content, filename=req.url[req.url.rfind("/")+1:req.url.find("?")])
-    else: 
-        return attach["url"]
-
+from utils import (
+    vk_to_tg_poll,
+    get_source_link,
+    get_max_size_photo
+    )
 
 class EventMessage:
     def __init__(self, type, ts, flags, value, chat_id, value2, text, data, attachments, *args, **kwargs) -> None: #i don`t know what is value
@@ -58,9 +39,10 @@ class Message:
     def __parse_attachments(self) -> list:
         media = []
         parsers = {
-            "photo": get_max_size_photo_url,
+            "photo": get_max_size_photo,
             "video": lambda x: x["player"],
             "doc": get_source_link,
+            "poll": vk_to_tg_poll,
         }
         for attach in self.attachments:
             media_type = attach["type"]

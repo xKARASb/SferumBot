@@ -2,14 +2,13 @@ from ast import literal_eval
 
 from aiogram import Bot
 from vk.types import Message as VkMessage
-from aiogram.types import Message as TgMessage
 from aiogram.types import InputMediaPhoto, InputMediaDocument, InputMediaAudio
+from utils import PollStub
 
 def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
     text = msg.get_tg_text()
     media = msg.media
     commands = []
-
     if media:
         types = {
         }
@@ -17,7 +16,8 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
         InputMedia = {
             "photo":InputMediaPhoto,
             "doc": InputMediaDocument,
-            "audio": InputMediaAudio
+            "audio": InputMediaAudio,
+            "poll": PollStub,
         }
 
         for attach in media:
@@ -37,10 +37,15 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
                         command = Bot.send_document
                     case "photo":
                         command = Bot.send_photo
+                    case "poll":
+                        kwargs = types[i][0].tg_poll
+                        commands.append(({"text": text, "parse_mode": "MarkdownV2"}, Bot.send_message))
+                        commands.append((kwargs, Bot.send_poll))
+                        continue  
                 kwargs = {types[i][0].type: types[i][0].media, "caption": types[i][0].caption, "parse_mode": "MarkdownV2"}
                 commands.append((kwargs, command))  
     else:
-        commands.append(({"text": text}, Bot.send_message))
+        commands.append(({"text": text, "parse_mode": "MarkdownV2"}, Bot.send_message))
     print(text)
     return commands
 
