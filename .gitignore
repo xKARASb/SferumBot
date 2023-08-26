@@ -1,3 +1,12 @@
 .env
 /env
 .vscode
+linked_msg.json
+
+vk/methods/__pycache__
+vk/types/__pycache__
+utils/__pycache__
+utils/__pycache__
+tgBot/methods/__pycache__
+tgBot/__pycache__
+main/__pycache__

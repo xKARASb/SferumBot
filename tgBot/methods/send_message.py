@@ -1,9 +1,7 @@
-from ast import literal_eval
-
 from aiogram import Bot
 from vk.types import Message as VkMessage
-from aiogram.types import InputMediaPhoto, InputMediaDocument, InputMediaAudio
-from utils import PollStub
+from aiogram.types import InputMediaPhoto, InputMediaDocument, InputMediaAudio, Message
+from utils import PollStub, MessageManager
 
 def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
     text = msg.get_tg_text()
@@ -46,11 +44,11 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
                 commands.append((kwargs, command))  
     else:
         commands.append(({"text": text, "parse_mode": "MarkdownV2"}, Bot.send_message))
-    print(text)
     return commands
 
 async def send_message(bot: Bot, msg: VkMessage):
     commands = generate_tg_message(msg)
     for message in commands:
-        await message[1](bot, bot.chat_id, **message[0])
-    
+        message: Message = await message[1](bot, bot.chat_id, **message[0])
+        if message.__getattribute__("poll"):
+            MessageManager().link_poll(message.poll)

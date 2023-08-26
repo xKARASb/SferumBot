@@ -3,16 +3,16 @@ import requests
 
 from asyncio import sleep
 
-from vk.methods import get_credentials, get_web_token, get_message
+from vk.methods import get_credentials, get_user_credentials, get_message
 from vk.types import EventMessage, Message
 
 from tgBot.methods import send_message
 
-async def main(key, ts, vk_chat_id, access_token, cookie, bot):
+async def main(key, ts, vk_chat_id, access_token, cookie, bot, vk_id):
     while True:
         await sleep(0.1)
         try:
-            req = requests.post("https://api.vk.me/ruim791593813?version=19&mode=682", data={"act": "a_check", "key": key, "ts": ts, "wait": 10}).json()
+            req = requests.post(f"https://api.vk.me/ruim{vk_id}?version=19&mode=682", data={"act": "a_check", "key": key, "ts": ts, "wait": 10}).json()
             if req.get("updates"):
                 ts += 1
                 event = req["updates"][0]
@@ -27,7 +27,7 @@ async def main(key, ts, vk_chat_id, access_token, cookie, bot):
             if req.get("failed", False) == 1:
                 ts = req["ts"]
             elif req.get("failed", False) == 2:
-                credentials = get_credentials(get_web_token(cookie))
+                credentials = get_credentials(get_user_credentials(cookie))
                 ts = credentials["ts"]
                 key = credentials["key"]
         except Exception as e:
