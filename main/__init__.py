@@ -1,5 +1,4 @@
 import asyncio
-from concurrent.futures import ProcessPoolExecutor
 
 from os import getenv
 from dotenv import load_dotenv
@@ -14,7 +13,7 @@ from tgBot import start_polling
 load_dotenv()
 
 tg_chat_id = getenv("TG_CHAT_ID")
-vk_chat_id = int(getenv("VK_CHAT_ID"))
+vk_chat_id = getenv("VK_CHAT_ID")
 bot_token = getenv("BOT_TOKEN")
 cookie = getenv("AUTH_COOKIE")
 

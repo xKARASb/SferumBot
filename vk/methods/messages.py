@@ -19,7 +19,9 @@ def get_message(access_token, pts) -> tuple[list, list]:
         "access_token": access_token
     }
     req = requests.post("https://api.vk.me/method/messages.getLongPollHistory?v=5.217", data=body).json()
-    return req["response"]["messages"]["items"], req["response"]["profiles"]
+    if req.get("error"):
+        return False, "access token", "expired"
+    return req["response"]["messages"]["items"], req["response"]["profiles"], req["response"]["conversations"][0]["chat_settings"]["title"]
 
 def send_message(access_token, peer_id, msg) -> None:
     data = {

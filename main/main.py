@@ -19,15 +19,19 @@ async def main(key, ts, vk_chat_id, access_token, cookie, bot, vk_id):
                 match event[0]:
                     case 10004:
                         raw_message = EventMessage(*event)
-                        if raw_message.chat_id == vk_chat_id:
-                            message, profile = get_message(access_token, req["pts"]-len(req["updates"]))
-                            message = Message(**message[0], profiles=profile)
+                        if f"{raw_message.chat_id}" == vk_chat_id.split(","):
+                            message, profile, chat_title = get_message(access_token, req["pts"]-len(req["updates"]))
+                            if not message:
+                                access_token = get_user_credentials(cookie)["access_token"]
+                                message, profile, chat_title = get_message(access_token, req["pts"]-len(req["updates"]))
+                            message = Message(**message[0], profiles=profile, chat_title=chat_title)
                             await send_message(bot, message)
                             
             if req.get("failed", False) == 1:
                 ts = req["ts"]
             elif req.get("failed", False) == 2:
-                credentials = get_credentials(get_user_credentials(cookie))
+                access_token = get_user_credentials(cookie)["access_token"]
+                credentials = get_credentials(access_token)
                 ts = credentials["ts"]
                 key = credentials["key"]
         except Exception as e:

@@ -4,7 +4,7 @@ from aiogram.types import InputMediaPhoto, InputMediaDocument, InputMediaAudio, 
 from utils import PollStub, MessageManager
 
 def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
-    text = msg.get_tg_text()
+    text = f"·{msg.chat_title}·\n{msg.get_tg_text()}"
     media = msg.media
     commands = []
     if media:
