@@ -9,7 +9,7 @@ def get_attachments(access_token, pts) -> list:
         "access_token": access_token
     }
     req = requests.post("https://api.vk.me/method/messages.getLongPollHistory?v=5.217", data=body).json()
-    return (req["response"]["messages"]["items"][0]["attachments"], req["response"]["messages"]["items"][0]["fwd_messages"])
+    return (req["response"]["messages"]["items"][-1]["attachments"], req["response"]["messages"]["items"][-1]["fwd_messages"])
 
 def get_message(access_token, pts) -> tuple[list, list]:
     body = {
@@ -21,7 +21,7 @@ def get_message(access_token, pts) -> tuple[list, list]:
     req = requests.post("https://api.vk.me/method/messages.getLongPollHistory?v=5.217", data=body).json()
     if req.get("error"):
         return False, "access token", "expired"
-    return req["response"]["messages"]["items"], req["response"]["profiles"], req["response"]["conversations"][0]["chat_settings"]["title"]
+    return req["response"]["messages"]["items"], req["response"]["profiles"], req["response"]["conversations"][-1]["chat_settings"]["title"]
 
 def send_message(access_token, peer_id, msg) -> None:
     data = {
