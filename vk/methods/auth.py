@@ -9,15 +9,24 @@ def get_credentials(access_token):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
     }
 
-    req = requests.post("https://api.vk.me/method/execute?v=5.217", data=body, headers=headers)
+    req = requests.post(
+        url = "https://api.vk.me/method/execute?v=5.217",
+        data = body,
+        headers = headers
+    )
     return req.json()["response"]["credentials"]
 
 def get_user_credentials(auth_cookie):
     cookies = {
-        "remixdsid": auth_cookie,
+        "remixdsid": auth_cookie
     }
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
     }
-    req = requests.get("https://web.vk.me/?act=web_token&app_id=8202606", cookies=cookies, headers=headers,  allow_redirects=False)
+    req = requests.get(
+        url = "https://web.vk.me/?act=web_token&app_id=8202606",
+        cookies = cookies,
+        headers = headers,
+        allow_redirects = False
+    )
     return req.json()[1]

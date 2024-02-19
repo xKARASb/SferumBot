@@ -11,7 +11,7 @@ host_id = int(getenv("TG_USER_ID"))
 
 dp = Dispatcher()
 
-@dp.message(F.from_user.id==host_id)
+@dp.message(F.from_user.id == host_id)
 async def on_message(message: Message) -> None:
     from main import bot
     send_message(bot.access_token, bot.peer_id, message.text)

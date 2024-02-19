@@ -1,24 +1,30 @@
 import requests
 from random import randint
 
-def get_attachments(access_token, pts) -> list:
+def get_attachments(access_token, pts) -> tuple[list, list]:
     body = {
         "extended": 1,
         "pts": pts,
         "fields":"id,first_name,last_name",
         "access_token": access_token
     }
-    req = requests.post("https://api.vk.me/method/messages.getLongPollHistory?v=5.217", data=body).json()
+    req = requests.post(
+        url = "https://api.vk.me/method/messages.getLongPollHistory?v=5.217",
+        data = body
+    ).json()
     return (req["response"]["messages"]["items"][-1]["attachments"], req["response"]["messages"]["items"][-1]["fwd_messages"])
 
-def get_message(access_token, pts) -> tuple[list, list]:
+def get_message(access_token, pts) -> tuple[list, list, str] | tuple[bool, str, str]:
     body = {
         "extended": 1,
         "pts": pts,
         "fields":"id,first_name,last_name",
         "access_token": access_token
     }
-    req = requests.post("https://api.vk.me/method/messages.getLongPollHistory?v=5.217", data=body).json()
+    req = requests.post(
+        url = "https://api.vk.me/method/messages.getLongPollHistory?v=5.217",
+        data = body
+    ).json()
     if req.get("error"):
         return False, "access token", "expired"
     return req["response"]["messages"]["items"], req["response"]["profiles"], req["response"]["conversations"][-1]["chat_settings"]["title"]
@@ -30,4 +36,7 @@ def send_message(access_token, peer_id, msg) -> None:
         "random_id": -randint(100000000, 999999999),
         "message": msg
     }
-    requests.post("https://api.vk.me/method/messages.send?v=5.218", data=data)
+    requests.post(
+        url = "https://api.vk.me/method/messages.send?v=5.218",
+        data = data
+    )

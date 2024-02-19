@@ -5,14 +5,14 @@ import logging
 from aiogram.types import Poll
 
 class LinkedPoll:
-    def __init__(self, owner_id: int = None, poll_id: int = None, question: str = None, asnwers: list= None):
+    def __init__(self, owner_id: int = None, poll_id: int = None, question: str = None, asnwers: list= None) -> None:
         self.owner_id = owner_id
         self.question = question
         self.poll_id = poll_id
         self.answers = asnwers
         self.linked = False
         
-    def add_tg_poll(self, tg_poll: Poll):
+    def add_tg_poll(self, tg_poll: Poll) -> None:
         self.tg_poll_id = tg_poll.id
         answers = []
         for option in tg_poll.options:
@@ -34,30 +34,30 @@ class MessageManager:
             data = { "messages": {"polls": {"links": [], "items": []}} }
             self.__write(data)
     
-    def __write(self, data, mode = "w"):
+    def __write(self, data, mode = "w") -> None:
         with open(self.file_name, mode) as f:
             json.dump(data, f)
     
-    def __get_json(self):
+    def __get_json(self) -> dict | list:
         with open(self.file_name) as f:
             data = json.load(f)
         return data
     
-    def __get_polls(self):
+    def __get_polls(self) -> list:
         return self.__get_json()["messages"]["polls"]
     
-    def __write_polls(self, polls):
+    def __write_polls(self, polls) -> None:
         data = self.__get_json()
         data["messages"]["polls"] = polls
         return self.__write(data)
     
-    def add_poll(self, vk_poll):
+    def add_poll(self, vk_poll) -> None:
         polls = self.__get_polls()
         polls["links"].append([vk_poll["id"], ])
         polls["items"].append(LinkedPoll(vk_poll["owner_id"], vk_poll["id"], vk_poll["question"], vk_poll["answers"]).__dict__)
         self.__write_polls(polls)
 
-    def link_poll(self, tg_poll: Poll):
+    def link_poll(self, tg_poll: Poll) -> None:
         polls = self.__get_polls()
         not_linked = polls["links"][len(polls["links"])-1]
         polls["links"].remove(not_linked)
@@ -73,7 +73,7 @@ class MessageManager:
                 break
         self.__write_polls(polls)
     
-    def get_poll(self, tg_poll_id):
+    def get_poll(self, tg_poll_id) -> LinkedPoll | None:
         polls = self.__get_polls()
         for i in polls["links"]:
             if i[1] == tg_poll_id:

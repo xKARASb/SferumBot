@@ -2,10 +2,10 @@ from utils import (
     vk_to_tg_poll,
     get_source_link,
     get_max_size_photo
-    )
+)
 
 class EventMessage:
-    def __init__(self, type, ts, flags, value, chat_id, value2, text, data, attachments, *args, **kwargs) -> None: #i don`t know what is value
+    def __init__(self, type, ts, flags, value, chat_id, value2, text, data, attachments, *args, **kwargs) -> None:
         self.__dict__.update(kwargs)
         self.type = type
         self.msg_id = ts
@@ -42,7 +42,7 @@ class Message:
             "photo": get_max_size_photo,
             "video": lambda x: x["player"],
             "doc": get_source_link,
-            "poll": vk_to_tg_poll,
+            "poll": vk_to_tg_poll
         }
         for attach in self.attachments:
             media_type = attach["type"]

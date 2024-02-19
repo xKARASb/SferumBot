@@ -11,11 +11,12 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
         types = {
         }
         #no pep8
+        # haha, true (by R1senDev)
         InputMedia = {
             "photo":InputMediaPhoto,
             "doc": InputMediaDocument,
             "audio": InputMediaAudio,
-            "poll": PollStub,
+            "poll": PollStub
         }
 
         for attach in media:
@@ -39,8 +40,12 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
                         kwargs = types[i][0].tg_poll
                         commands.append(({"text": text, "parse_mode": "MarkdownV2"}, Bot.send_message))
                         commands.append((kwargs, Bot.send_poll))
-                        continue  
-                kwargs = {types[i][0].type: types[i][0].media, "caption": types[i][0].caption, "parse_mode": "MarkdownV2"}
+                        continue
+                kwargs = {
+                    types[i][0].type: types[i][0].media,
+                    "caption": types[i][0].caption,
+                    "parse_mode": "MarkdownV2"
+                }
                 commands.append((kwargs, command))  
     else:
         commands.append(({"text": text, "parse_mode": "MarkdownV2"}, Bot.send_message))
