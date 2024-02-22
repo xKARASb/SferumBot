@@ -15,5 +15,5 @@ def send_message(access_token, peer_id, text) -> None:
         "v": v 
     }
 
-    requests.post("https://api.vk.me/method/messages.send",\
+    requests.post("https://api.vk.me/method/messages.send",
                     data=data, params=query)

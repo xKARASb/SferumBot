@@ -19,20 +19,24 @@ class Message:
         if self.fwd: self.__parse_fwds()
         if self.fwd: self.__get_all_media()
 
-    @classmethod
+    @staticmethod
     def __get_source_link(attach) -> str:
         req = requests.get(attach["url"])
         if "text" in req.headers.get("Content-Type").split("/"): 
-            url = req.text[req.text.find("https:", req.text.find("docUrl")):req.text.find('",', req.text.find("docUrl"))]
+            url = req.text[
+                req.text.find("https:", req.text.find("docUrl")):\
+                                req.text.find('",', req.text.find("docUrl"))]
             req = requests.get(''.join(url.split("\\")))
             if len(req.content) < 52428800: 
                 return BufferedInputFile(req.content, filename=req.url[req.url.rfind("/")+1:req.url.find("?")])
         elif "application" in req.headers.get("Content-Type").split("/"):
-            return BufferedInputFile(req.content, filename=req.url[req.url.rfind("/")+1:req.url.find("?")])
+            return BufferedInputFile(req.content,
+                                    filename=req.url[req.url.rfind("/")+1:\
+                                                     req.url.find("?")])
         else: 
             return attach["url"]
 
-    @classmethod
+    @staticmethod
     def __get_max_size_photo_url(attach: dict) -> str: 
         link = (0, 100)
         lvls = ("w", "z", "y", "r", "q", "p", "o", "x", "m", "s")
@@ -69,7 +73,7 @@ class Message:
                 self.first_name = profile["first_name"]
                 self.last_name = profile["last_name"]
                 self.full_name = f"{self.first_name} {self.last_name}"
-                return
+                return 
         
     def __repr__(self) -> str:
         sender = self.__dict__.get("full_name", self.sender_id)
@@ -80,7 +84,7 @@ class Message:
             string += f", fwds: {self.fwd}"
         return string
 
-    @classmethod
+    @staticmethod
     def __validate_text(text) -> str:
         validate_text = []
 
@@ -105,7 +109,10 @@ class Message:
     def get_tg_text(self, fwd_depth = 1) -> str:
         text = f"{self.full_name}:\n{'    '*fwd_depth}{self.text}"
         if self.attachments:
-            text += f"\n{'    '*fwd_depth} " + f" ".join([f"*{x[0]}*" if x[0] != "video" else f"[{x[0]}]({x[1]})" for x in self.media ])
+            text += f"\n{'    '*fwd_depth} " + f" "\
+                .join([f"*{x[0]}*" if x[0] != "video" else f"[{x[0]}]({x[1]})"
+                        for x in self.media ])
         if self.fwd:
-            text += f"\n{'    '*fwd_depth}" + f"\n{'    '*fwd_depth}".join([Message.get_tg_text(msg, fwd_depth=fwd_depth+1) for msg in self.fwd])
+            text += f"\n{'    '*fwd_depth}" + f"\n{'    '*fwd_depth}"\
+                .join([Message.get_tg_text(msg, fwd_depth=fwd_depth+1) for msg in self.fwd])
         return text

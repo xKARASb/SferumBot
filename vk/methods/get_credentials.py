@@ -15,7 +15,7 @@ def get_credentials(access_token) -> ServerCredentials:
         "v": v
     }
 
-    req = requests.post("https://api.vk.me/method/messages.getLongPollServer",\
+    req = requests.post("https://api.vk.me/method/messages.getLongPollServer",
                         data=body, params=query)
     
     return ServerCredentials(**req.json()["response"])

@@ -14,7 +14,7 @@ def get_message(access_token, pts) -> tuple[list, list, str]:
         "v": v
     }
 
-    req = requests.post("https://api.vk.me/method/messages.getLongPollHistory",\
+    req = requests.post("https://api.vk.me/method/messages.getLongPollHistory",
                         data=body, params=query).json()
     if req.get("error"):
         return {"error": True, "text": "access token has expired"}

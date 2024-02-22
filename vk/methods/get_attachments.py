@@ -14,7 +14,7 @@ def get_attachments(access_token, pts):
         "v": v
     }
 
-    req = requests.post("https://api.vk.me/method/messages.getLongPollHistory",\
+    req = requests.post("https://api.vk.me/method/messages.getLongPollHistory",
                         data=body, params=query).json()
     
     if req["response"]["messages"].get("items"):

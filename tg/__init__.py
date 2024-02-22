@@ -1,0 +1,1 @@
+from .bot import start_polling
