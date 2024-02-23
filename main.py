@@ -24,11 +24,8 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
 
                 if event[0] == 4:
                     raw_msg = EventMessage(*event)
-                    print(raw_msg)
-                    print(raw_msg.chat_id)
-                    print(vk_chat_ids.split(", "))
+                    logging.info(raw_msg)
                     if str(raw_msg.chat_id) in vk_chat_ids.split(", "):
-                        print("chat")
                         message, profile, chat_title = get_message(access_token, pts)
                         pts += 1
                         if not message:

@@ -13,6 +13,8 @@ from tg import start_polling
 
 load_dotenv()
 
+logging.basicConfig(encoding="utf-8", level=logging.INFO)
+
 tg_chat_id = getenv("TG_CHAT_ID")
 vk_chat_ids = getenv("VK_CHAT_ID")
 bot_token = getenv("BOT_TOKEN")
@@ -25,7 +27,6 @@ creds = get_credentials(access_token)
 loop = asyncio.get_event_loop()
 
 try:
-    logging.basicConfig(encoding="utf-8")
     bot = Bot(bot_token)
     task2 = loop.create_task(main(creds.server, creds.key, creds.ts, tg_chat_id, vk_chat_ids, access_token, cookie, creds.pts, bot))
     logging.info("Loop starting")

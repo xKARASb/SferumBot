@@ -2,7 +2,7 @@ import requests
 from aiogram.types import BufferedInputFile
 
 class Message:
-    def __init__(self, date, from_id, text, attachments, conversation_message_id, peer_id, **kwargs):
+    def __init__(self, date, from_id, text, attachments, conversation_message_id, **kwargs):
         self.__dict__.update(kwargs)
         self.date = date
         self.sender_id = from_id
@@ -10,7 +10,6 @@ class Message:
         self.attachments = attachments
         self.chat_msg_id = conversation_message_id
         self.fwd = self.__dict__.get("fwd_messages", None)
-        self.chat_id = peer_id
         self.media = []
         self.full_name = self.sender_id
         
