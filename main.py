@@ -37,10 +37,10 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
             if req.get("failed", False) == 1:
                 data["ts"] = req["ts"]
             elif req.get("failed", False) == 2:
-                access_token = get_user_credentials(cookie)["access_token"]
+                access_token = get_user_credentials(cookie).access_token
                 credentials = get_credentials(access_token)
-                data["ts"] = credentials["ts"]
-                data["key"] = credentials["key"]
+                data["ts"] = credentials.ts
+                data["key"] = credentials.key
 
         except Exception as e:
             logging.exception(e)
