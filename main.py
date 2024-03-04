@@ -29,7 +29,7 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                         message, profile, chat_title = get_message(access_token, pts)
                         pts += 1
                         if not message:
-                            access_token = get_user_credentials(cookie)["access_token"]
+                            access_token = get_user_credentials(cookie).access_token
                             message, profile, chat_title = get_message(access_token, pts)
                         msg = Message(**message[0], profiles=profile, chat_title=chat_title)
                         await send_message(bot, msg, tg_chat_id)
