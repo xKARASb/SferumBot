@@ -18,5 +18,8 @@ def get_message(access_token, pts) -> tuple[list, list, str]:
                         data=body, params=query).json()
     if req.get("error"):
         return {"error": True, "text": "access token has expired"}
-    return req["response"]["messages"]["items"], req["response"]["profiles"],\
-            req["response"]["conversations"][-1]["chat_settings"]["title"]
+    return {
+        "items": req["response"]["messages"]["items"],
+        "profiles": req["response"]["profiles"],
+        "title": req["response"]["conversations"][-1]["chat_settings"]["title"]
+        }

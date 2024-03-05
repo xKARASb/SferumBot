@@ -26,11 +26,21 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                     raw_msg = EventMessage(*event)
                     logging.info(raw_msg)
                     if str(raw_msg.chat_id) in vk_chat_ids.split(", "):
-                        message, profile, chat_title = get_message(access_token, pts)
-                        pts += 1
-                        if not message:
+                        # message, profile, chat_title = get_message(access_token, pts)
+                        
+                        message = get_message(access_token, pts)
+
+                        if message.get("error"):
                             access_token = get_user_credentials(cookie).access_token
-                            message, profile, chat_title = get_message(access_token, pts)
+                            credentials = get_credentials(access_token)
+                            data["ts"] = credentials.ts - 1
+                            data["key"] = credentials.key                            
+                            continue
+                        
+                        message, profile, chat_title = message["items"], message["profiles"], message["title"]
+
+                        pts += 1
+                        
                         msg = Message(**message[0], profiles=profile, chat_title=chat_title)
                         await send_message(bot, msg, tg_chat_id)
 
