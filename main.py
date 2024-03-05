@@ -33,7 +33,7 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                         if message.get("error"):
                             access_token = get_user_credentials(cookie).access_token
                             credentials = get_credentials(access_token)
-                            data["ts"] = credentials.ts - 1
+                            data["ts"] = credentials.ts
                             data["key"] = credentials.key                            
                             continue
                         
