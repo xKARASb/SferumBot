@@ -1,5 +1,6 @@
 from .consts import v
 import requests
+import logging
 
 
 def get_message(access_token, pts) -> tuple[list, list, str]:
@@ -16,6 +17,7 @@ def get_message(access_token, pts) -> tuple[list, list, str]:
 
     req = requests.post("https://api.vk.me/method/messages.getLongPollHistory",
                         data=body, params=query).json()
+    logging.debug(f"[VK API] get_message response: {req}")
     if req.get("error"):
         return {"error": True, "text": "access token has expired"}
     return {
