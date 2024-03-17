@@ -9,11 +9,10 @@ from aiogram import Bot
 from vk.methods import get_credentials, get_user_credentials
 
 from main import main
-from tg import start_polling
 
 load_dotenv()
 
-logging.basicConfig(encoding="utf-8", level=logging.INFO)
+logging.basicConfig(filename="../sferum_in.log", encoding="utf-8", level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
 
 tg_chat_id = getenv("TG_CHAT_ID")
 vk_chat_ids = getenv("VK_CHAT_ID")
