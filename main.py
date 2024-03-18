@@ -37,7 +37,10 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                             credentials = get_credentials(access_token)
                             data["ts"] = credentials.ts
                             data["key"] = credentials.key                            
-                            continue
+                            
+                            message = get_message(access_token, pts)
+                            
+
                         
                         message, profile, chat_title = message["items"], message["profiles"], message["title"]
 
