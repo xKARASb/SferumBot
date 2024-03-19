@@ -18,6 +18,7 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
         await sleep(.1)
         try:
             req = requests.post(f"https://{server}", data=data).json()
+            
             if req.get("updates"):
                 data["ts"] += 1
                 event = req["updates"][0]
@@ -40,15 +41,13 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                             
                             message = get_message(access_token, pts)
                             
-
-                        
                         message, profile, chat_title = message["items"], message["profiles"], message["title"]
-
-                        pts += 1
-                        
+    
                         msg = Message(**message[0], profiles=profile, chat_title=chat_title)
                         await send_message(bot, msg, tg_chat_id)
-
+                    
+                    pts += 1
+                    
             if req.get("failed", False) == 1:
                 data["ts"] = req["ts"]
             elif req.get("failed", False) == 2:
