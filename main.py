@@ -40,13 +40,16 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                             data["key"] = credentials.key                            
                             
                             message = get_message(access_token, pts)
+                            logging.info(message)
                             
+                        pts += 1
+                        
                         message, profile, chat_title = message["items"], message["profiles"], message["title"]
     
                         msg = Message(**message[0], profiles=profile, chat_title=chat_title)
                         await send_message(bot, msg, tg_chat_id)
-                    
-                    pts += 1
+                    else:
+                        pts += 1
                     
             if req.get("failed", False) == 1:
                 data["ts"] = req["ts"]
