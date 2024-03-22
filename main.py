@@ -46,7 +46,7 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                         
                         message, profile, chat_title = message["items"], message["profiles"], message["title"]
     
-                        msg = Message(**message[0], profiles=profile, chat_title=chat_title)
+                        msg = Message(**message[-1], profiles=profile, chat_title=chat_title)
                         await send_message(bot, msg, tg_chat_id)
                     else:
                         pts += 1
