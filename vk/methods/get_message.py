@@ -20,8 +20,14 @@ def get_message(access_token, pts) -> tuple[list, list, str]:
     logging.debug(f"[VK API] get_message response: {req}")
     if req.get("error"):
         return {"error": True, "text": "access token has expired"}
+    
+    if req["response"]["conversations"][-1]["type"] == "user":
+        title = "Direct message"
+    else:
+        title = req["response"]["conversations"][-1]["chat_settings"]["title"]
+
     return {
         "items": req["response"]["messages"]["items"],
         "profiles": req["response"]["profiles"],
-        "title": req["response"]["conversations"][-1]["chat_settings"]["title"]
+        "title": title
         }
