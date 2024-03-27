@@ -21,10 +21,14 @@ def get_message(access_token, pts) -> tuple[list, list, str]:
     if req.get("error"):
         return {"error": True, "text": "access token has expired"}
     
-    if req["response"]["conversations"][-1]["type"] == "user":
+    peer_type = req["response"]["conversations"][-1]["peer"]["type"]
+
+    if peer_type == "user":
         title = "Direct message"
-    else:
+    elif peer_type == "chat":
         title = req["response"]["conversations"][-1]["chat_settings"]["title"]
+    else:
+        title = "None"
 
     return {
         "items": req["response"]["messages"]["items"],
