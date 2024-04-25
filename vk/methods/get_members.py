@@ -14,8 +14,11 @@ def get_members(access_token, peer):
         "v": v
     }
 
-    req = requests.post("https://api.vk.me/method/messages.getConversationMembers",
-                        data=data, params=query).json()
+    req = requests.post(
+        url    = "https://api.vk.me/method/messages.getConversationMembers",
+        data   = data,
+        params = query
+    ).json()
     
     if req.get("error"):
         return {"error": True, "text": "No profiles"}

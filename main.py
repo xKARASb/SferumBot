@@ -5,7 +5,7 @@ from asyncio import sleep
 
 from vk.methods import get_credentials, get_user_credentials, get_message
 from tg.methods import send_message
-from vk.types import Message, EventMessage
+from vk.types   import Message, EventMessage
 
 async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, pts, bot):
     data = {
@@ -17,7 +17,10 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
     while True:
         await sleep(.1)
         try:
-            req = requests.post(f"https://{server}", data=data).json()
+            req = requests.post(
+                url  = f"https://{server}",
+                data = data
+            ).json()
             
             if req.get("updates"):
                 data["ts"] += 1
@@ -35,9 +38,9 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
 
                         if message.get("error"):
                             access_token = get_user_credentials(cookie).access_token
-                            credentials = get_credentials(access_token)
-                            data["ts"] = credentials.ts
-                            data["key"] = credentials.key                            
+                            credentials  = get_credentials(access_token)
+                            data["ts"]   = credentials.ts
+                            data["key"]  = credentials.key                            
                             
                             message = get_message(access_token, pts)
                             logging.info(message)
@@ -55,9 +58,9 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                 data["ts"] = req["ts"]
             elif req.get("failed", False) == 2:
                 access_token = get_user_credentials(cookie).access_token
-                credentials = get_credentials(access_token)
-                data["ts"] = credentials.ts
-                data["key"] = credentials.key
+                credentials  = get_credentials(access_token)
+                data["ts"]   = credentials.ts
+                data["key"]  = credentials.key
 
         except Exception as e:
             logging.exception(e)

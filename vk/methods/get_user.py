@@ -12,7 +12,11 @@ def get_user_credentials(auth_cookie) -> UserCredentials:
         "app_id": 8202606
     }
     
-    req = requests.get("https://web.vk.me/", params=query,
-                        cookies=cookies, allow_redirects=False)
+    req = requests.get(
+        url             = "https://web.vk.me/",
+        params          = query,
+        cookies         = cookies,
+        allow_redirects = False
+    )
     
     return UserCredentials(**req.json()[1])

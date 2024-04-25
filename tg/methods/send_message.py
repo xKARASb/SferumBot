@@ -1,5 +1,5 @@
-from aiogram import Bot
-from vk.types import Message as VkMessage
+from aiogram       import Bot
+from vk.types      import Message as VkMessage
 from aiogram.types import InputMediaPhoto, InputMediaDocument, InputMediaAudio, Message
 
 
@@ -13,7 +13,7 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
 
         #no pep8
         InputMedia = {
-            "photo":InputMediaPhoto,
+            "photo": InputMediaPhoto,
             "doc": InputMediaDocument,
             "audio": InputMediaAudio,
         }
@@ -22,8 +22,10 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
             if attach[0] == "video":
                 continue
             types[attach[0]] = types.get(attach[0], [])
-            types[attach[0]].append(InputMedia[attach[0]](media=attach[1],
-                                                            parse_mode="MarkdownV2"))
+            types[attach[0]].append(InputMedia[attach[0]](
+                media      = attach[1],
+                parse_mode = "MarkdownV2"
+            ))
         
         types[list(types.keys())[0]][0].caption = text
         for i in types.keys():
@@ -43,7 +45,7 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
                     types[i][0].type: types[i][0].media,
                     "caption": types[i][0].caption,
                     "parse_mode": "MarkdownV2"
-                    }
+                }
                 commands.append((kwargs, command))  
     else:
         commands.append(({"text": text, "parse_mode": "MarkdownV2"}, Bot.send_message))

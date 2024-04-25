@@ -18,8 +18,11 @@ def get_history(access_token, ts, pts):
         "v": v 
     }
 
-    req = requests.post("https://api.vk.me/method/messages.getLongPollHistory",
-                        params=query, data=body).json()
+    req = requests.post(
+        url    = "https://api.vk.me/method/messages.getLongPollHistory",
+        params = query,
+        data   = body
+    ).json()
 
 
     if req.get("error"):

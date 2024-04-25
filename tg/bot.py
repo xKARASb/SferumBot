@@ -1,8 +1,8 @@
-from os import getenv
+from os     import getenv
 from dotenv import load_dotenv
 
 from aiogram.types import Message, PollAnswer
-from aiogram import Dispatcher, F, Bot
+from aiogram       import Dispatcher, F, Bot
 
 from vk.methods import send_message
 
@@ -11,7 +11,7 @@ host_id = int(getenv("TG_USER_ID"))
 
 dp = Dispatcher()
 
-@dp.message(F.from_user.id==host_id)
+@dp.message(F.from_user.id == host_id)
 async def on_message(message: Message, bot: Bot) -> None:
     send_message(bot.peer_id, message.text)
 

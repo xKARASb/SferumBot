@@ -1,5 +1,5 @@
 import requests
-from random import randint
+from random  import randint
 from .consts import v
 
 
@@ -15,5 +15,8 @@ def send_message(access_token, peer_id, text) -> None:
         "v": v 
     }
 
-    requests.post("https://api.vk.me/method/messages.send",
-                    data=data, params=query)
+    requests.post(
+        url = "https://api.vk.me/method/messages.send",
+        data = data,
+        params = query
+    )
