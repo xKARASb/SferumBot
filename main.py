@@ -7,7 +7,7 @@ from vk.methods import get_credentials, get_user_credentials, get_message
 from tg.methods import send_message
 from vk.types import Message, EventMessage
 
-async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, pts, bot):
+async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, pts, bot, tg_topic_id = None):
     data = {
         "act": "a_check",
         "key": key,
@@ -47,7 +47,7 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                         message, profile, chat_title = message["items"], message["profiles"], message["title"]
     
                         msg = Message(**message[-1], profiles=profile, chat_title=chat_title)
-                        await send_message(bot, msg, tg_chat_id)
+                        await send_message(bot, msg, tg_chat_id, tg_topic_id)
                     else:
                         pts += 1
                     
