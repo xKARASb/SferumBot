@@ -62,6 +62,9 @@ Give administrator rights or to messages.
 You can get the chat id via [@username_to_id_bot](https://t.me/username_to_id_bot)
 And put your id to ```TG_CHAT_ID``` in ```example.env```
 
+> [!TIP]
+> To send messages to one of the topics of supergroup also add `TG_TOPIC_ID`
+
 __Sferum chat ids:__
  
 >What is peer https://web.vk.me/convo/{peer_id}
