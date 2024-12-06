@@ -49,7 +49,7 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
         commands.append(({"text": text, "parse_mode": "MarkdownV2"}, Bot.send_message))
     return commands
 
-async def send_message(bot: Bot, msg: VkMessage, tg_chat_id: int):
+async def send_message(bot: Bot, msg: VkMessage, tg_chat_id: int, tg_topic_id = None):
     commands = generate_tg_message(msg)
     for message in commands:
-        message: Message = await message[1](bot, tg_chat_id, **message[0])
+        message: Message = await message[1](bot, tg_chat_id, message_thread_id=tg_topic_id, **message[0])
