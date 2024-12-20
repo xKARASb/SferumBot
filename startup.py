@@ -15,7 +15,7 @@ load_dotenv()
 logging.basicConfig(filename="../sferum_in.log", encoding="utf-8", level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
 
 tg_chat_id = getenv("TG_CHAT_ID")
-tg_topic_id = int(getenv("TG_TOPIC_ID"))
+tg_topic_id = int(getenv("TG_TOPIC_ID", default=0))
 vk_chat_ids = getenv("VK_CHAT_ID")
 bot_token = getenv("BOT_TOKEN")
 cookie = getenv("AUTH_COOKIE")
