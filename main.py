@@ -7,18 +7,25 @@ from vk.methods import get_credentials, get_user_credentials, get_message
 from tg.methods import send_message
 from vk.types import Message, EventMessage
 
-async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, pts, bot, tg_topic_id = None):
-    data = {
-        "act": "a_check",
-        "key": key,
-        "ts": ts,
-        "wait": 10  
-    }
+
+async def main(
+    server,
+    key,
+    ts,
+    tg_chat_id,
+    vk_chat_ids,
+    access_token,
+    cookie,
+    pts,
+    bot,
+    tg_topic_id=None,
+):
+    data = {"act": "a_check", "key": key, "ts": ts, "wait": 10}
     while True:
-        await sleep(.1)
+        await sleep(0.1)
         try:
             req = requests.post(f"https://{server}", data=data).json()
-            
+
             if req.get("updates"):
                 data["ts"] += 1
                 event = req["updates"][0]
@@ -29,7 +36,7 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                     if str(raw_msg.chat_id) in vk_chat_ids.split(", "):
                         # message, profile, chat_title = get_message(access_token, pts)
                         logging.debug("[MAIN] allowed chat")
-                        
+
                         message = get_message(access_token, pts)
                         logging.info(message)
 
@@ -37,20 +44,26 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                             access_token = get_user_credentials(cookie).access_token
                             credentials = get_credentials(access_token)
                             data["ts"] = credentials.ts
-                            data["key"] = credentials.key                            
-                            
+                            data["key"] = credentials.key
+
                             message = get_message(access_token, pts)
                             logging.info(message)
-                            
+
                         pts += 1
-                        
-                        message, profile, chat_title = message["items"], message["profiles"], message["title"]
-    
-                        msg = Message(**message[-1], profiles=profile, chat_title=chat_title)
+
+                        message, profile, chat_title = (
+                            message["items"],
+                            message["profiles"],
+                            message["title"],
+                        )
+
+                        msg = Message(
+                            **message[-1], profiles=profile, chat_title=chat_title
+                        )
                         await send_message(bot, msg, tg_chat_id, tg_topic_id)
                     else:
                         pts += 1
-                    
+
             if req.get("failed", False) == 1:
                 data["ts"] = req["ts"]
             elif req.get("failed", False) == 2:
@@ -61,4 +74,3 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
 
         except Exception as e:
             logging.exception(e)
-

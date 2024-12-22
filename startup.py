@@ -12,7 +12,13 @@ from main import main
 
 load_dotenv()
 
-logging.basicConfig(filename="../sferum_in.log", encoding="utf-8", level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
+logging.basicConfig(
+    filename="../sferum_in.log",
+    encoding="utf-8",
+    level=logging.INFO,
+    format='[%(asctime)s] %(message)s',
+    datefmt="%m/%d/%Y %I:%M:%S %p",
+)
 
 tg_chat_id = getenv("TG_CHAT_ID")
 tg_topic_id = int(getenv("TG_TOPIC_ID", default=0))
@@ -28,7 +34,20 @@ loop = asyncio.get_event_loop()
 
 try:
     bot = Bot(bot_token)
-    task2 = loop.create_task(main(creds.server, creds.key, creds.ts, tg_chat_id, vk_chat_ids, access_token, cookie, creds.pts, bot, tg_topic_id))
+    task2 = loop.create_task(
+        main(
+            creds.server,
+            creds.key,
+            creds.ts,
+            tg_chat_id,
+            vk_chat_ids,
+            access_token,
+            cookie,
+            creds.pts,
+            bot,
+            tg_topic_id,
+        )
+    )
     logging.info("Loop starting")
     loop.run_forever()
 except KeyboardInterrupt:
