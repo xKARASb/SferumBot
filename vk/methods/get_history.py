@@ -1,25 +1,33 @@
+"""Get history."""
+
 import requests
-from .consts import v, lp_version
+
+from .consts import LP_VERSION, V
 
 
-def get_history(access_token, ts, pts):
+def get_history(access_token: str, ts: int, pts: int) -> tuple:
+    """Get history."""
     body = {
         "access_token": access_token,
         "ts": ts,
         "pts": pts,
         "fields": "id,first_name,last_name",
-        "lp_version": lp_version,
+        "LP_VERSION": LP_VERSION,
         "last_n": 1,
         "extended": 1,
-        "credentials": 1
+        "credentials": 1,
     }
 
     query = {
-        "v": v 
+        "v": V ,
     }
 
-    req = requests.post("https://api.vk.me/method/messages.getLongPollHistory",
-                        params=query, data=body).json()
+    req = requests.post(
+        "https://api.vk.me/method/messages.getLongPollHistory",
+        params=query,
+        data=body,
+        timeout=20,
+    ).json()
 
 
     if req.get("error"):

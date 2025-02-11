@@ -1,24 +1,43 @@
-from loguru import logger
-import requests
+"""Main cycle module."""
 
 from asyncio import sleep
 
-from vk.methods import get_credentials, get_user_credentials, get_message
-from tg.methods import send_message
-from vk.types import Message, EventMessage
+import requests
+from aiogram import Bot
+from loguru import logger
 
-async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, pts, bot):
+from tg.methods import send_message
+from vk.methods import get_credentials, get_message, get_user_credentials
+from vk.types import EventMessage, Message
+
+
+async def main(
+    server: str,
+    key: str,
+    ts: int,
+    tg_chat_id: str,
+    vk_chat_ids: str,
+    access_token: str,
+    cookie: str,
+    pts: int,
+    bot: Bot,
+) -> None:
+    """Main cycle function."""
     data = {
         "act": "a_check",
         "key": key,
         "ts": ts,
-        "wait": 10
+        "wait": 10,
     }
     while True:
         await sleep(.1)
         try:
-            req = requests.post(f"https://{server}", data=data).json()
-            
+            req = requests.post(
+                f"https://{server}",
+                data=data,
+                timeout=20,
+            ).json()
+
             if req.get("updates"):
                 data["ts"] += 1
                 event = req["updates"][0]
@@ -27,30 +46,35 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                     raw_msg = EventMessage(*event)
                     logger.info(f"[MAIN] raw_msg: {raw_msg}")
                     if str(raw_msg.chat_id) in vk_chat_ids.split(", "):
-                        # message, profile, chat_title = get_message(access_token, pts)
                         logger.debug("[MAIN] allowed chat")
-                        
-                        message = get_message(access_token, pts)
-                        logger.debug(message)
 
-                        if message.get("error"):
+                        _message = get_message(access_token, pts)
+
+                        if _message.get("error"):
                             access_token = get_user_credentials(cookie).access_token
                             credentials = get_credentials(access_token)
                             data["ts"] = credentials.ts
-                            data["key"] = credentials.key                            
-                            
-                            message = get_message(access_token, pts)
-                            logger.info(message)
-                            
+                            data["key"] = credentials.key
+
+                            logger.error(_message)
+                        else:
+                            logger.debug(_message)
+
                         pts += 1
-                        
-                        message, profile, chat_title = message["items"], message["profiles"], message["title"]
-    
-                        msg = Message(**message[-1], profiles=profile, chat_title=chat_title)
+
+                        message = _message["items"]
+                        profile = _message["profiles"]
+                        chat_title = _message["title"]
+
+                        msg = Message(
+                            **message[-1],
+                            profiles=profile,
+                            chat_title=chat_title,
+                        )
                         await send_message(bot, msg, tg_chat_id)
                     else:
                         pts += 1
-                    
+
             if req.get("failed", False) == 1:
                 data["ts"] = req["ts"]
             elif req.get("failed", False) == 2:

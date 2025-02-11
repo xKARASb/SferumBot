@@ -1,22 +1,32 @@
+"""Get members."""
+
+from __future__ import annotations
+
 import requests
-from .consts import v
+
+from .consts import V
 
 
-def get_members(access_token, peer):
+def get_members(access_token: str, peer: int) -> dict | str:
+    """Get members."""
     data = {
         "access_token": access_token,
         "peer_id": peer,
         "extended": 1,
-        "fields": 'id, first_name, last_name'
+        "fields": "id, first_name, last_name",
     }
 
     query = {
-        "v": v
+        "v": V,
     }
 
-    req = requests.post("https://api.vk.me/method/messages.getConversationMembers",
-                        data=data, params=query).json()
-    
+    req = requests.post(
+        "https://api.vk.me/method/messages.getConversationMembers",
+        data=data,
+        params=query,
+        timeout=20,
+    ).json()
+
     if req.get("error"):
         return {"error": True, "text": "No profiles"}
     return req["response"]["profiles"]

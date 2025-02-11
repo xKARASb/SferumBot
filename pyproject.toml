@@ -1,2 +1,5 @@
 [tool.ruff.lint]
 select = ["ALL"]
+ignore = [
+    "BLE001", "PLR2004", "PLE0604"
+]

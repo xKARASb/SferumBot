@@ -1,6 +1,7 @@
 """Bot startup module."""
 
 import asyncio
+import sys
 from os import getenv
 
 from aiogram import Bot
@@ -10,13 +11,30 @@ from loguru import logger
 from main import main as _main
 from vk.methods import get_credentials, get_user_credentials
 
-# Get the consts from .env
+# Get and check the consts from .env
 load_dotenv()
 
 AUTH_COOKIE = getenv("AUTH_COOKIE")
+if not AUTH_COOKIE:
+    logger.error("Необходимо заполнить AUTH_COOKIE в .env")
+    sys.exit()
+
 BOT_TOKEN = getenv("BOT_TOKEN")
+if not BOT_TOKEN:
+    logger.error("Необходимо заполнить BOT_TOKEN в .env")
+    sys.exit()
+
 TG_CHAT_ID = getenv("TG_CHAT_ID")
+if not TG_CHAT_ID:
+    TG_CHAT_ID = getenv("TG_USER_ID")
+    if not TG_CHAT_ID:
+        logger.error("Необходимо заполнить TG_USER_ID в .env")
+        sys.exit()
+
 VK_CHAT_ID = getenv("VK_CHAT_ID")
+if not VK_CHAT_ID:
+    logger.error("Необходимо заполнить VK_CHAT_ID в .env")
+    sys.exit()
 
 
 async def main() -> None:
@@ -48,6 +66,9 @@ async def main() -> None:
 
     except Exception as e:
         logger.exception(e)
+
+    finally:
+        await bot.close()
 
 
 if __name__ == "__main__":
