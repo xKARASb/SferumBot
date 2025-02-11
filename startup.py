@@ -4,51 +4,45 @@
 # Я понимаю, что это всего лишь предупреждение, но его нужно ликвидировать.
 
 import asyncio
-from loguru import logger
-
 from os import getenv
-from dotenv import load_dotenv
 
 from aiogram import Bot
+from dotenv import load_dotenv
+from loguru import logger
 
+from main import main as _main
 from vk.methods import get_credentials, get_user_credentials
 
-from main import main
-
-
-# Connect logs file
-logger.add("sferum.log")
-
-
+# Get the consts from .env
 load_dotenv()
 
-tg_chat_id = getenv("TG_CHAT_ID")
+AUTH_COOKIE = getenv("AUTH_COOKIE")
+BOT_TOKEN = getenv("BOT_TOKEN")
+TG_CHAT_ID = getenv("TG_CHAT_ID")
+VK_CHAT_ID = getenv("VK_CHAT_ID")
 
-# FIXME(@iamlostshe): Если значение не указано вызывает исключение:
-#
-# TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
 
-tg_topic_id = int(getenv("TG_TOPIC_ID", default=0))
-vk_chat_ids = getenv("VK_CHAT_ID")
-bot_token = getenv("BOT_TOKEN")
-cookie = getenv("AUTH_COOKIE")
+def main():
+    # Connect logs file
+    logger.add("sferum.log")
 
-user = get_user_credentials(cookie)
-access_token = user.access_token
-creds = get_credentials(access_token)
+    # Any data
+    user = get_user_credentials(AUTH_COOKIE)
+    access_token = user.access_token
+    creds = get_credentials(access_token)
 
-loop = asyncio.get_event_loop()
+    loop = asyncio.get_event_loop()
 
-try:
-    bot = Bot(bot_token)
-    task2 = loop.create_task(main(creds.server, creds.key, creds.ts, tg_chat_id, vk_chat_ids, access_token, cookie, creds.pts, bot, tg_topic_id))
-    logger.info("Loop starting")
-    loop.run_forever()
-except KeyboardInterrupt:
-    pass
-except Exception as e:
-    logger.exception(e)
-finally:
-    logger.info("Closing loop...")
-    loop.close()
-    logger.info("Loop closed")
+    try:
+        bot = Bot(BOT_TOKEN)
+        loop.create_task(_main(creds.server, creds.key, creds.ts, TG_CHAT_ID, VK_CHAT_ID, access_token, AUTH_COOKIE, creds.pts, bot, TG_TOPIC_ID))
+        logger.info("Loop starting")
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        logger.exception(e)
+    finally:
+        logger.info("Closing loop...")
+        loop.close()
+        logger.info("Loop closed")
