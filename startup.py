@@ -1,3 +1,8 @@
+# FIXME(@iamlostshe): /home/<full_path>/startup.py:32: DeprecationWarning: There is no current event loop
+# loop = asyncio.get_event_loop()
+#
+# Я понимаю, что это всего лишь предупреждение, но его нужно ликвидировать.
+
 import asyncio
 import logging
 
@@ -15,6 +20,11 @@ load_dotenv()
 logging.basicConfig(filename="../sferum_in.log", encoding="utf-8", level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
 
 tg_chat_id = getenv("TG_CHAT_ID")
+
+# FIXME(@iamlostshe): Если значение не указано вызывает исключение:
+#
+# TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+
 tg_topic_id = int(getenv("TG_TOPIC_ID", default=0))
 vk_chat_ids = getenv("VK_CHAT_ID")
 bot_token = getenv("BOT_TOKEN")

@@ -16,27 +16,33 @@ The packages that this application runs on
 - You can get messages from several chats
 
 ## How to use
+
 #### Install app
 
 - Clone repository:
+
 ```sh
 git clone https://github.com/xKARASb/SferumBot.git
-cd ./SferumBot
+cd SferumBot
 ```
 
 - Setup eviroment:
+
 ```sh
-python3 -m venv ./venv
+python3 -m venv venv
 ```
 
 - Activate enviroment:
+
 ```sh
-source ./venv/bin/activate
+. venv/bin/activate
 ```
+
 > [!NOTE]
 > For Windows use `.\venv\Scripts\Activate`
 
 - Setup dependencies:
+
 ```sh
 pip install -r requirements.txt
 ```
@@ -46,6 +52,7 @@ pip install -r requirements.txt
 - Authentification cookie for bot:
 
 Go to [Sferum](https://web.vk.me/) >> <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> >> Application >> Storage >> Cookies >> `https://web.vk.me`
+
 After that you will see a **table** with all cookies from this site!
 In filter put `remixdsid` and copy data from `value` column.
 
@@ -74,15 +81,18 @@ If you want the bot to send you messages in private messages, just copy `TG_USER
 - Sferum chat ids:
 
 Get a peer (id) from chat url (`https://web.vk.me/convo/{peer_id}`) and add it to `VK_CHAT_ID`:
+
 ```
 VK_CHAT_ID="200000015"
 VK_CHAT_ID="200000015, 200000016"
 ```
+
 So you can add several chats
 
 - Rename `example.env` to `.env`
 
 #### Run app
+
 ```sh
 python startup.py
 ```
@@ -96,4 +106,3 @@ MIT
 [Asyncio]: <https://docs.python.org/3/library/asyncio.html>
 [Aiogram 3.x]: <https://docs.aiogram.dev/en/dev-3.x/index.html>
 [Requests]: <https://requests.readthedocs.io/en/latest/>
-
