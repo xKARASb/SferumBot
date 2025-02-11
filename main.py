@@ -31,7 +31,7 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                         logger.debug("[MAIN] allowed chat")
                         
                         message = get_message(access_token, pts)
-                        logger.info(message)
+                        logger.debug(message)
 
                         if message.get("error"):
                             access_token = get_user_credentials(cookie).access_token

@@ -1,7 +1,4 @@
-# FIXME(@iamlostshe): /home/<full_path>/startup.py:32: DeprecationWarning: There is no current event loop
-# loop = asyncio.get_event_loop()
-#
-# Я понимаю, что это всего лишь предупреждение, но его нужно ликвидировать.
+"""Bot startup module."""
 
 import asyncio
 from os import getenv
@@ -22,7 +19,8 @@ TG_CHAT_ID = getenv("TG_CHAT_ID")
 VK_CHAT_ID = getenv("VK_CHAT_ID")
 
 
-def main():
+async def main() -> None:
+    """Bot startup function."""
     # Connect logs file
     logger.add("sferum.log")
 
@@ -31,18 +29,26 @@ def main():
     access_token = user.access_token
     creds = get_credentials(access_token)
 
-    loop = asyncio.get_event_loop()
-
     try:
+        # Initializing bot
         bot = Bot(BOT_TOKEN)
-        loop.create_task(_main(creds.server, creds.key, creds.ts, TG_CHAT_ID, VK_CHAT_ID, access_token, AUTH_COOKIE, creds.pts, bot, TG_TOPIC_ID))
-        logger.info("Loop starting")
-        loop.run_forever()
+
+        # Print the log
+        logger.info("Bot was started")
+
+        # Run the main cycle
+        await _main(
+            creds.server, creds.key, creds.ts,
+            TG_CHAT_ID, VK_CHAT_ID, access_token,
+            AUTH_COOKIE, creds.pts, bot,
+        )
+
     except KeyboardInterrupt:
-        pass
+        logger.info("Bot was stoped")
+
     except Exception as e:
         logger.exception(e)
-    finally:
-        logger.info("Closing loop...")
-        loop.close()
-        logger.info("Loop closed")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
