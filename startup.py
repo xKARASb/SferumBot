@@ -4,7 +4,7 @@
 # Я понимаю, что это всего лишь предупреждение, но его нужно ликвидировать.
 
 import asyncio
-import logging
+from loguru import logger
 
 from os import getenv
 from dotenv import load_dotenv
@@ -15,9 +15,12 @@ from vk.methods import get_credentials, get_user_credentials
 
 from main import main
 
-load_dotenv()
 
-logging.basicConfig(filename="../sferum_in.log", encoding="utf-8", level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
+# Connect logs file
+logger.add("sferum.log")
+
+
+load_dotenv()
 
 tg_chat_id = getenv("TG_CHAT_ID")
 
@@ -39,13 +42,13 @@ loop = asyncio.get_event_loop()
 try:
     bot = Bot(bot_token)
     task2 = loop.create_task(main(creds.server, creds.key, creds.ts, tg_chat_id, vk_chat_ids, access_token, cookie, creds.pts, bot, tg_topic_id))
-    logging.info("Loop starting")
+    logger.info("Loop starting")
     loop.run_forever()
 except KeyboardInterrupt:
     pass
 except Exception as e:
-    logging.exception(e)
+    logger.exception(e)
 finally:
-    logging.info("Closing loop...")
+    logger.info("Closing loop...")
     loop.close()
-    logging.info("Loop closed")
+    logger.info("Loop closed")

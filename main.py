@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 import requests
 
 from asyncio import sleep
@@ -25,13 +25,13 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
 
                 if event[0] == 4:
                     raw_msg = EventMessage(*event)
-                    logging.info(f"[MAIN] raw_msg: {raw_msg}")
+                    logger.info(f"[MAIN] raw_msg: {raw_msg}")
                     if str(raw_msg.chat_id) in vk_chat_ids.split(", "):
                         # message, profile, chat_title = get_message(access_token, pts)
-                        logging.debug("[MAIN] allowed chat")
+                        logger.debug("[MAIN] allowed chat")
                         
                         message = get_message(access_token, pts)
-                        logging.info(message)
+                        logger.info(message)
 
                         if message.get("error"):
                             access_token = get_user_credentials(cookie).access_token
@@ -40,7 +40,7 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                             data["key"] = credentials.key                            
                             
                             message = get_message(access_token, pts)
-                            logging.info(message)
+                            logger.info(message)
                             
                         pts += 1
                         
@@ -60,5 +60,4 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                 data["key"] = credentials.key
 
         except Exception as e:
-            logging.exception(e)
-
+            logger.exception(e)
