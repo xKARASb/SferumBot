@@ -1,108 +1,126 @@
-# Sferum Bot by [@xKARASb](https://github.com/xKARASb)
+# Sferum Bot от [@xKARASb](https://github.com/xKARASb)
 
-## Powered by
-- [Python 3.11](https://docs.python.org/3.11/)
+This `README` is also available on [English](https://github.com/xKARASb/SferumBot/blob/main/README_EN.md) <- click.
 
-## Tech
-The packages that this application runs on
-- [Asyncio]
-- [Aiogram 3.x]
-- [Requests]
+## Как пользоваться?
 
-## Features
-- Catch text messages and send to TG
-- Catch media and send to TG (with TG limits)
-- Send forwared messages with media
-- You can get messages from several chats
+1. Клонируем репозиторий:
 
-## How to use
-
-#### Install app
-
-- Clone repository:
-
-```sh
+``` sh
 git clone https://github.com/xKARASb/SferumBot.git
 cd SferumBot
 ```
 
-- Setup eviroment:
+2. Созаём и активируем виртуальное окружение:
 
-```sh
+``` sh
 python3 -m venv venv
-```
-
-- Activate enviroment:
-
-```sh
 . venv/bin/activate
 ```
 
-> [!NOTE]
-> For Windows use `.\venv\Scripts\Activate`
+> **ЗАМЕТКА**
+>
+> Вторая команда для Windows выглядит следющим образом:
+>
+> ```
+> .\venv\Scripts\Activate
+> ```
 
-- Setup dependencies:
+3. Установка зависимостей:
 
-```sh
+``` sh
 pip install -r requirements.txt
 ```
 
-#### Setup ```.env``` file
+4. Заполняем поля в `.env.dist`:
 
-- Authentification cookie for bot:
+- `AUTH_COOKIE`
 
-Go to [Sferum](https://web.vk.me/) >> <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> >> Application >> Storage >> Cookies >> `https://web.vk.me`
+[Инструкция для `Microsoft Edge`](https://github.com/xKARASb/SferumBot/issues/9)
 
-After that you will see a **table** with all cookies from this site!
-In filter put `remixdsid` and copy data from `value` column.
+Зайдите в [Sferum](https://web.vk.me/).
 
-_Congratulations 🎉 you get auth cookie now just add it to `AUTH_COOKIE` in `example.env`_
+Нажмите <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd>, после чего откроются параметры для разработчиков.
 
-- Bot token:
+Перейдите в раздел `Application` (Приложение) >> `Storage` (Хранилище) >> `Cookies` (Файлы cookie) >> `https://web.vk.me`.
 
-Go to: [@BotFather](https://t.me/BotFather) and create new bot.
-Then put HTTP API token in `BOT_TOKEN` in `example.env`
+Затем введите в поле поиска "remixdsid" и скопируйте его значение (должно начинаться с "vk1.a.").
 
-- Telegram user id:
+Заполните поле в `.env.dist`.
 
-You can get it from [@username_to_id_bot](https://t.me/username_to_id_bot)
-And put your id to `TG_USER_ID` in `example.env`
+- `BOT_TOKEN`
 
-- Telegram chat id:
+Перейдите в [@BotFather](https://t.me/BotFather).
 
-If you want the bot to send you messages in private messages, just copy `TG_USER_ID`, else you can create a chat and add the bot there. 
- 
-> [!IMPORTANT]
-> Give administrator rights to your bot
+Введите команду `/newbot`, а затем укажите название и юзернейм для бота (отдельными сообщениями).
 
-> [!TIP]
-> To send messages to one of the topics of supergroup instead of general also add `TG_TOPIC_ID`
+Скопируйте токен и вставьте его в `.env.dist`.
 
-- Sferum chat ids:
+- `TG_USER_ID`
 
-Get a peer (id) from chat url (`https://web.vk.me/convo/{peer_id}`) and add it to `VK_CHAT_ID`:
+Вы можете получить ваш id [в этом боте](https://t.me/username_to_id_bot).
+
+Скопируйте его и вставьте его в `.env.dist`.
+
+- `TG_CHAT_ID`
+
+Можно оставить пустым, если не собираетесь использовать бота в группе/канале.
+
+В настройках телеграм включите отображения id: `Настройки` > `Продвинутые настройки` > `Эксперементальные настройки` > `Show Peer IDs in profile`.
+
+Запи
+
+> **ВАЖНО**
+>
+> Дайте боту права администратора в группе/канале.
+
+> **ЗАМЕТКА**
+>
+> Чтобы пересылать сообщения в один из разделов супергруппы вы можете указать его id в `TG_TOPIC_ID`.
+
+- `VK_CHAT_ID`
+
+Получите id чата, открыв его в браузере:
 
 ```
-VK_CHAT_ID="200000015"
-VK_CHAT_ID="200000015, 200000016"
+https://web.vk.me/convo/{здесь нужный нам id}
 ```
 
-So you can add several chats
+Вы можете записать чаты, из которых необходимо пересылать сообщения в `.env.dist` следующим образом:
 
-- Rename `example.env` to `.env`
-
-#### Run app
-
-```sh
-python startup.py
+```
+VK_CHAT_ID=200000015, 200000016
+VK_CHAT_ID=200000015,200000016
+VK_CHAT_ID=200000015
 ```
 
-## License 
+5. Переименуйте `.env.dist` -> `.env`.
+
+6. Запуск:
+
+``` sh
+python3 startup.py
+```
+
+## Работает на
+
+- [Python 3.13](https://docs.python.org/3.13/)
+
+## Использованные технологии:
+
+- [Asyncio](https://docs.python.org/3/library/asyncio.html)
+- [Aiogram 3.x](https://docs.aiogram.dev/en/latest/)
+- [Requests](https://requests.readthedocs.io/en/latest/)
+
+## Возможности:
+
+- Пересылать текстовые сообщения в telegram.
+- Пересылать медта в telegram (ограничиваясь лимитами telegram).
+- Отправка пересланных сообщений с медиа.
+- Можно получать сообщения из нескольких чатов.
+
+## Лицензия:
 
 MIT
 
-**Free Software, Hell Yeah!**
-
-[Asyncio]: <https://docs.python.org/3/library/asyncio.html>
-[Aiogram 3.x]: <https://docs.aiogram.dev/en/dev-3.x/index.html>
-[Requests]: <https://requests.readthedocs.io/en/latest/>
+**Открытое програмное обеспечение, черт возьми!**

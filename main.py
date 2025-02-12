@@ -45,7 +45,7 @@ async def main(
                 if event[0] == 4:
                     raw_msg = EventMessage(*event)
                     logger.info(f"[MAIN] raw_msg: {raw_msg}")
-                    if str(raw_msg.chat_id) in vk_chat_ids.split(", "):
+                    if str(raw_msg.chat_id) in "".join(vk_chat_ids.split()).split(","):
                         logger.debug("[MAIN] allowed chat")
 
                         _message = get_message(access_token, pts)
@@ -65,6 +65,9 @@ async def main(
                         message = _message["items"]
                         profile = _message["profiles"]
                         chat_title = _message["title"]
+
+                        if chat_title == "Direct message":
+                            chat_title = "Личное сообщение"
 
                         msg = Message(
                             **message[-1],
