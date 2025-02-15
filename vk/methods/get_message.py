@@ -31,12 +31,10 @@ def get_message(access_token: str, pts: int) -> tuple[list, list, str]:
 
     peer_type = req["response"]["conversations"][-1]["peer"]["type"]
 
-    if peer_type == "user":
-        title = "Direct message"
-    elif peer_type == "chat":
+    title = None
+
+    if peer_type == "chat":
         title = req["response"]["conversations"][-1]["chat_settings"]["title"]
-    else:
-        title = "None"
 
     return {
         "items": req["response"]["messages"]["items"],

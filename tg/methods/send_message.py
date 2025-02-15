@@ -1,10 +1,20 @@
+"""Send msg to telegram."""
+
+from __future__ import annotations
+
+import re
+from typing import TYPE_CHECKING
+
 from aiogram import Bot
-from vk.types import Message as VkMessage
-from aiogram.types import InputMediaPhoto, InputMediaDocument, InputMediaAudio, Message
+from aiogram.types import InputMediaAudio, InputMediaDocument, InputMediaPhoto
+
+if TYPE_CHECKING:
+    from vk.types import Message as VkMessage
 
 
-def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
-    text = f"{msg.chat_title}\n{msg.get_tg_text()}"
+def gen_tg_msg(msg: VkMessage) -> tuple[dict, callable]:
+    """Generate telegram message."""
+    text = msg.get_tg_text(msg.chat_title)
     media = msg.media
     commands = []
 
@@ -50,7 +60,14 @@ def generate_tg_message(msg: VkMessage) -> tuple[dict, callable]:
         commands.append(({"text": text}, Bot.send_message))
     return commands
 
-async def send_message(bot: Bot, msg: VkMessage, tg_chat_id: int, tg_topic_id = None):
-    commands = generate_tg_message(msg)
+async def send_message(
+    bot: Bot,
+    msg: VkMessage,
+    tg_chat_id: int,
+    tg_topic_id: int | None = None,
+) -> None:
+    """Send message to telegram."""
+    commands = gen_tg_msg(msg)
+
     for message in commands:
-        message: Message = await message[1](bot, tg_chat_id, message_thread_id=tg_topic_id, **message[0])
+        await message[1](bot, tg_chat_id, message_thread_id=tg_topic_id, **message[0])

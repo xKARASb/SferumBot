@@ -5,6 +5,8 @@ import sys
 from os import getenv
 
 from aiogram import Bot
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 from loguru import logger
 
@@ -49,7 +51,10 @@ async def main() -> None:
 
     try:
         # Initializing bot
-        bot = Bot(BOT_TOKEN)
+        bot = Bot(
+            BOT_TOKEN,
+            default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2),
+        )
 
         # Print the log
         logger.info("Bot was started")

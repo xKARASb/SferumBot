@@ -1,3 +1,4 @@
+from loguru import logger
 import requests
 
 from .consts import V
@@ -21,6 +22,8 @@ def get_attachments(access_token, pts):
         params=query,
         timeout=20,
     ).json()
+
+    logger.debug(req)
 
     if req["response"]["messages"].get("items"):
         req = req["response"]["messages"]["items"][-1]

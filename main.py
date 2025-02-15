@@ -30,13 +30,15 @@ async def main(
         "wait": 10,
     }
     while True:
-        await sleep(.1)
+        await sleep(0.1)
         try:
             req = requests.post(
                 f"https://{server}",
                 data=data,
                 timeout=20,
             ).json()
+
+            logger.debug(req)
 
             if req.get("updates"):
                 data["ts"] += 1
@@ -66,8 +68,7 @@ async def main(
                         profile = _message["profiles"]
                         chat_title = _message["title"]
 
-                        if chat_title == "Direct message":
-                            chat_title = "Личное сообщение"
+                        chat_title = "" if not chat_title else f"{chat_title}"
 
                         msg = Message(
                             **message[-1],

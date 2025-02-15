@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import requests
+from loguru import logger
 
 from .consts import V
 
@@ -26,6 +27,8 @@ def get_members(access_token: str, peer: int) -> dict | str:
         params=query,
         timeout=20,
     ).json()
+
+    logger.debug(req)
 
     if req.get("error"):
         return {"error": True, "text": "No profiles"}

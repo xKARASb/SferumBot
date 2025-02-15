@@ -2,14 +2,23 @@
 
 from __future__ import annotations
 
+import re
+
 import requests
 from aiogram.types import BufferedInputFile
+
+REFACTOR_REGEX = r"(?<!\\)(_|\*|\[|\]|\(|\)|\~|`|>|#|\+|-|=|\||\{|\}|\.|\!)"
+
+
+def markdown_escape(text: str) -> str:
+    """Escapes markdown."""
+    return re.sub(REFACTOR_REGEX, lambda t: "\\" + t.group(), text) + "\n\n"
 
 
 class Message:
     """Get msg."""
 
-    def __init__(self, date, from_id, text, attachments, conversation_message_id, **kwargs):
+    def __init__(self, date, from_id: int, text: str, attachments, conversation_message_id, **kwargs):
         self.__dict__.update(kwargs)
         self.date = date
         self.sender_id = from_id
@@ -38,7 +47,10 @@ class Message:
                                 req.text.find('",', req.text.find("docUrl"))]
             req = requests.get("".join(url.split("\\")), timeout=20)
             if len(req.content) < 52428800:
-                return BufferedInputFile(req.content, filename=req.url[req.url.rfind("/")+1:req.url.find("?")])
+                return BufferedInputFile(
+                    req.content,
+                    filename=req.url[req.url.rfind("/")+1:req.url.find("?")],
+                )
         elif "application" in req.headers.get("Content-Type").split("/"):
             return BufferedInputFile(req.content,
                                     filename=req.url[req.url.rfind("/")+1:\
@@ -106,14 +118,32 @@ class Message:
 
         return self.media
 
-    def get_tg_text(self, fwd_depth: int | None = 1) -> str:
+    def get_tg_text(
+        self, chat_title: str | None = "", fwd_depth: int | None = 1,
+    ) -> str:
         """Build telegram msg."""
-        text = f"{self.full_name}:\n\n{self.text}"
+        # Формируем сообщение
+        text = "".join([
+            "*",
+            markdown_escape(
+                f'{chat_title}{"\n" if chat_title else ""}{self.full_name}:',
+            ),
+            "*",
+            markdown_escape(f"\n{self.text}"),
+        ])
+
+        # Вложения (фото, видео, документы)
         if self.attachments:
-            text += f"\n{"    "*fwd_depth} " + " "\
-                .join([f"*{x[0]}*" if x[0] != "video" else f"[{x[0]}]({x[1]})"
-                        for x in self.media ])
+            text += "\n".join([
+                f"*{x[0]}*" if x[0] != "video" else f"[{x[0]}]({x[1]})"
+                for x in self.media
+            ])
+
+        # Пересланные сообщения (forward)
         if self.fwd:
-            text += f"\n{"    " * fwd_depth}" + f"\n{"    " * fwd_depth}"\
-                .join([Message.get_tg_text(msg, fwd_depth=fwd_depth+1) for msg in self.fwd])
+            text += "\n".join([
+                Message.get_tg_text(msg, fwd_depth=fwd_depth + 1) for msg in self.fwd
+            ])
+
+        # Возвращаем текст сообщения
         return text

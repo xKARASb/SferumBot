@@ -1,6 +1,7 @@
 """Get history."""
 
 import requests
+from loguru import logger
 
 from .consts import LP_VERSION, V
 
@@ -29,6 +30,7 @@ def get_history(access_token: str, ts: int, pts: int) -> tuple:
         timeout=20,
     ).json()
 
+    logger.debug(req)
 
     if req.get("error"):
         return {"error": True, "message": "Access token expired"}
