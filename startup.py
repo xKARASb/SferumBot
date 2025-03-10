@@ -7,6 +7,7 @@ from os import getenv
 from aiogram import Bot
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiohttp import ClientSession
 from dotenv import load_dotenv
 from loguru import logger
 
@@ -44,27 +45,31 @@ async def main() -> None:
     # Connect logs file
     logger.add("sferum.log")
 
-    # Any data
-    user = get_user_credentials(AUTH_COOKIE)
-    access_token = user.access_token
-    creds = get_credentials(access_token)
-
     try:
-        # Initializing bot
-        bot = Bot(
-            BOT_TOKEN,
-            default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2),
-        )
+        # Creating an aiogram seesion object
+        async with ClientSession() as session:
 
-        # Print the log
-        logger.info("Bot was started")
+            # Any data
+            user = await get_user_credentials(AUTH_COOKIE, session)
+            access_token = user.access_token
+            creds = await get_credentials(access_token, session)
 
-        # Run the main cycle
-        await _main(
-            creds.server, creds.key, creds.ts,
-            TG_CHAT_ID, VK_CHAT_ID, access_token,
-            AUTH_COOKIE, creds.pts, bot,
-        )
+            # Initializing bot
+            bot = Bot(
+                BOT_TOKEN,
+                default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2),
+            )
+
+            # Print the log
+            logger.info("Bot was started")
+
+            # Run the main cycle
+            await _main(
+                session,
+                creds.server, creds.key, creds.ts,
+                TG_CHAT_ID, VK_CHAT_ID, access_token,
+                AUTH_COOKIE, creds.pts, bot,
+            )
 
     except KeyboardInterrupt:
         logger.info("Bot was stoped")

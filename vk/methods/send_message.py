@@ -1,6 +1,6 @@
 """Send msg."""
 
-from random import randint
+from secrets import randbelow
 
 import requests
 
@@ -12,7 +12,7 @@ def send_message(access_token: str, peer_id: int, text: str) -> None:
     data = {
         "access_token": access_token,
         "peer_id": peer_id,
-        "random_id": -randint(100000000, 999999999),
+        "random_id": -randbelow(100000000, 999999999),
         "message": text,
     }
 

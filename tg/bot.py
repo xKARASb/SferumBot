@@ -25,7 +25,7 @@ dp = Dispatcher()
 async def on_message(message: Message, bot: Bot) -> None:
     """Send message."""
     send_message(bot.peer_id, message.text)
-    print(message.text)
+
 
 async def start_polling(bot: Bot) -> None:
     """Start polling function."""

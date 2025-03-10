@@ -1,10 +1,13 @@
-from loguru import logger
+"""Get attachments."""
+
 import requests
+from loguru import logger
 
 from .consts import V
 
 
-def get_attachments(access_token, pts):
+def get_attachments(access_token: str, pts: int) -> tuple:
+    """Get attachments."""
     body = {
         "extended": 1,
         "pts": pts,
@@ -23,9 +26,9 @@ def get_attachments(access_token, pts):
         timeout=20,
     ).json()
 
-    logger.debug(req)
+    logger.debug("[attachments] {}", req)
 
     if req["response"]["messages"].get("items"):
         req = req["response"]["messages"]["items"][-1]
-    return (req["attachments"],\
-            req["fwd_messages"])
+
+    return req["attachments"], req["fwd_messages"]

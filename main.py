@@ -1,17 +1,16 @@
 """Main cycle module."""
 
-from asyncio import sleep
-
-import requests
 from aiogram import Bot
+from aiohttp import ClientSession
 from loguru import logger
 
 from tg.methods import send_message
 from vk.methods import get_credentials, get_message, get_user_credentials
-from vk.types import EventMessage, Message
+from vk.vk_types import EventMessage, Message
 
 
 async def main(
+    session: ClientSession,
     server: str,
     key: str,
     ts: int,
@@ -22,21 +21,17 @@ async def main(
     pts: int,
     bot: Bot,
 ) -> None:
-    """Main cycle function."""
+    """Cycle function."""
     data = {
         "act": "a_check",
         "key": key,
         "ts": ts,
         "wait": 10,
     }
-    while True:
-        await sleep(0.1)
-        try:
-            req = requests.post(
-                f"https://{server}",
-                data=data,
-                timeout=20,
-            ).json()
+    try:
+        while True:
+            req = await session.post(f"https://{server}", data=data, timeout=20)
+            req = await req.json()
 
             logger.debug(req)
 
@@ -47,7 +42,9 @@ async def main(
                 if event[0] == 4:
                     raw_msg = EventMessage(*event)
                     logger.info(f"[MAIN] raw_msg: {raw_msg}")
-                    if str(raw_msg.chat_id) in "".join(vk_chat_ids.split()).split(","):
+                    if str(
+                        raw_msg.chat_id,
+                    ) in "".join(vk_chat_ids.split()).split(","):
                         logger.debug("[MAIN] allowed chat")
 
                         _message = get_message(access_token, pts)
@@ -87,5 +84,5 @@ async def main(
                 data["ts"] = credentials.ts
                 data["key"] = credentials.key
 
-        except Exception as e:
-            logger.exception(e)
+    except Exception as e:
+        logger.error(e)

@@ -1,12 +1,15 @@
 """Get info about user."""
 
-import requests
+from aiohttp import ClientSession
 from loguru import logger
 
-from vk.types import UserCredentials
+from vk.vk_types import UserCredentials
 
 
-def get_user_credentials(auth_cookie: str) -> UserCredentials:
+async def get_user_credentials(
+    auth_cookie: str,
+    session: ClientSession,
+) -> UserCredentials:
     """Get info about user."""
     cookies = {
         "remixdsid": auth_cookie,
@@ -18,15 +21,16 @@ def get_user_credentials(auth_cookie: str) -> UserCredentials:
     }
 
     # Send the request
-    req = requests.get(
+    req = await session.get(
         "https://web.vk.me/",
         params=query,
         cookies=cookies,
         allow_redirects=False,
         timeout=20,
     )
+    req = await req.json()
 
     # Print log
-    logger.debug(req.json())
+    logger.debug(req)
 
-    return UserCredentials(**req.json()[1])
+    return UserCredentials(**req[1])
