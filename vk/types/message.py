@@ -13,6 +13,8 @@ class Message:
         self.media = []
         self.full_name = self.sender_id
         
+        if self.__dict__.get("chat_title", ""):
+            self.chat_title = self.__validate_text(self.chat_title)
         if self.__dict__.get("profiles", False): self.__sender_full_name()
         if self.attachments: self.__parse_attachments()
         if self.fwd: self.__parse_fwds()
