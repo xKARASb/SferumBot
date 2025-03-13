@@ -1,2 +1,4 @@
-lp_version = 19
-v = "5.223"
+"""Some constants."""
+
+LP_VERSION = 19
+V = "5.223"

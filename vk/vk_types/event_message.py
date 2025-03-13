@@ -1,4 +1,8 @@
+"""Event message object."""
+
 class EventMessage:
+    """Event message class."""
+
     def __init__(self, type, msg_id, flags, peer, value, title, text, *args, **kwargs) -> None:
         self.type = type
         self.msg_id = msg_id
