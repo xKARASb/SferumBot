@@ -1,56 +1,81 @@
-import logging
-import requests
+"""Main cycle module."""
 
-from asyncio import sleep
+from aiogram import Bot
+from aiohttp import ClientSession
+from loguru import logger
 
-from vk.methods import get_credentials, get_user_credentials, get_message
 from tg.methods import send_message
-from vk.types import Message, EventMessage
+from vk.methods import get_credentials, get_message, get_user_credentials
+from vk.vk_types import EventMessage, Message
 
-async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, pts, bot, tg_topic_id = None):
+
+async def main(
+    session: ClientSession,
+    server: str,
+    key: str,
+    ts: int,
+    tg_chat_id: str,
+    vk_chat_ids: str,
+    access_token: str,
+    cookie: str,
+    pts: int,
+    bot: Bot,
+) -> None:
+    """Cycle function."""
     data = {
         "act": "a_check",
         "key": key,
         "ts": ts,
-        "wait": 10  
+        "wait": 10,
     }
-    while True:
-        await sleep(.1)
-        try:
-            req = requests.post(f"https://{server}", data=data).json()
-            
+    try:
+        while True:
+            req = await session.post(f"https://{server}", data=data, timeout=20)
+            req = await req.json()
+
+            logger.debug(req)
+
             if req.get("updates"):
                 data["ts"] += 1
                 event = req["updates"][0]
 
                 if event[0] == 4:
                     raw_msg = EventMessage(*event)
-                    logging.info(f"[MAIN] raw_msg: {raw_msg}")
-                    if str(raw_msg.chat_id) in vk_chat_ids.split(", "):
-                        # message, profile, chat_title = get_message(access_token, pts)
-                        logging.debug("[MAIN] allowed chat")
-                        
-                        message = get_message(access_token, pts)
-                        logging.info(message)
+                    logger.info(f"[MAIN] raw_msg: {raw_msg}")
+                    if str(
+                        raw_msg.chat_id,
+                    ) in "".join(vk_chat_ids.split()).split(","):
+                        logger.debug("[MAIN] allowed chat")
 
-                        if message.get("error"):
+                        _message = get_message(access_token, pts)
+
+                        if _message.get("error"):
                             access_token = get_user_credentials(cookie).access_token
                             credentials = get_credentials(access_token)
                             data["ts"] = credentials.ts
-                            data["key"] = credentials.key                            
-                            
-                            message = get_message(access_token, pts)
-                            logging.info(message)
-                            
+                            data["key"] = credentials.key
+
+                            logger.error(_message)
+                        else:
+                            logger.debug(_message)
+
                         pts += 1
-                        
-                        message, profile, chat_title = message["items"], message["profiles"], message["title"]
-    
-                        msg = Message(**message[-1], profiles=profile, chat_title=chat_title)
-                        await send_message(bot, msg, tg_chat_id, tg_topic_id)
+
+                        message = _message["items"]
+                        profile = _message["profiles"]
+                        chat_title = _message["title"]
+
+                        chat_title = "" if not chat_title else f"{chat_title}"
+
+                        msg = Message(
+                            **message[-1],
+                            profiles=profile,
+                            chat_title=chat_title,
+                        )
+                        await send_message(bot, msg, tg_chat_id)
                     else:
                         pts += 1
-                    
+
             if req.get("failed", False) == 1:
                 data["ts"] = req["ts"]
             elif req.get("failed", False) == 2:
@@ -59,6 +84,5 @@ async def main(server, key, ts, tg_chat_id, vk_chat_ids, access_token, cookie, p
                 data["ts"] = credentials.ts
                 data["key"] = credentials.key
 
-        except Exception as e:
-            logging.exception(e)
-
+    except Exception as e:
+        logger.error(e)

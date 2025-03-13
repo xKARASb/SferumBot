@@ -1,21 +1,38 @@
-import requests
-from .consts import v, lp_version
-from vk.types import ServerCredentials
+"""Get server info."""
+
+from aiohttp import ClientSession
+from loguru import logger
+
+from vk.vk_types import ServerCredentials
+
+from .consts import LP_VERSION, V
 
 
-def get_credentials(access_token) -> ServerCredentials:
+async def get_credentials(
+    access_token: str,
+    session: ClientSession,
+) -> ServerCredentials:
+    """Get server info."""
     body = {
         "need_pts": 1,
         "group_id": 0,
-        "lp_version": lp_version,
-        "access_token": access_token
+        "LP_VERSION": LP_VERSION,
+        "access_token": access_token,
     }
 
     query = {
-        "v": v
+        "v": V,
     }
 
-    req = requests.post("https://api.vk.me/method/messages.getLongPollServer",
-                        data=body, params=query)
-    
-    return ServerCredentials(**req.json()["response"])
+    req = await session.post(
+        "https://api.vk.me/method/messages.getLongPollServer",
+        data=body,
+        params=query,
+        timeout=20,
+    )
+    req = await req.json()
+
+    # Print log
+    logger.debug(req)
+
+    return ServerCredentials(**req["response"])
