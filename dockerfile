@@ -14,4 +14,4 @@ ENV DOCKER=true \
 COPY --from=builder /SferumBot /SferumBot
 COPY --from=builder /venv /SferumBot/venv
 
-CMD ["python3", "main.py"]
+CMD ["python3", "startup.py"]
