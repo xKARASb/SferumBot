@@ -12,6 +12,6 @@ class Profile:
         """Build user profile."""
         self.__dict__.update(kwargs)
 
-    def get_full_name(self) -> str:
+    async def get_full_name(self) -> str:
         """Return user fullname."""
         return f"{self.first_name} {self.last_name}"

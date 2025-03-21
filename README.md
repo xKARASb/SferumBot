@@ -10,14 +10,13 @@ This `README` is also available on [English](https://github.com/xKARASb/SferumBo
 
 - [Asyncio](https://docs.python.org/3/library/asyncio.html)
 - [Aiogram 3.x](https://docs.aiogram.dev/en/latest/)
-- [Requests](https://requests.readthedocs.io/en/latest/)
 
 ## Возможности:
 
-- Пересылать текстовые сообщения в telegram.
-- Пересылать медиа в telegram (ограничиваясь лимитами telegram).
-- Отправка пересланных сообщений с медиа.
-- Можно получать сообщения из нескольких чатов.
+- [x] Пересылать текстовые сообщения в telegram.
+- [x] Пересылать медиа в telegram (ограничиваясь лимитами telegram).
+- [x] Можно получать сообщения из нескольких чатов.
+- [ ] Отправка пересланных сообщений с медиа.
 
 ## Как пользоваться?
 
@@ -28,28 +27,7 @@ git clone https://github.com/xKARASb/SferumBot.git
 cd SferumBot
 ```
 
-2. Созаём и активируем виртуальное окружение:
-
-``` sh
-python3 -m venv venv
-. venv/bin/activate
-```
-
-> **ЗАМЕТКА**
->
-> Вторая команда для Windows выглядит следющим образом:
->
-> ```
-> .\venv\Scripts\Activate
-> ```
-
-3. Установка зависимостей:
-
-``` sh
-pip install -r requirements.txt
-```
-
-4. Заполняем поля в `.env.dist`:
+2. Заполняем поля в `.env.dist`:
 
 - `AUTH_COOKIE`
 
@@ -111,9 +89,60 @@ VK_CHAT_ID=200000015,200000016
 VK_CHAT_ID=200000015
 ```
 
-5. Переименуйте `.env.dist` -> `.env`.
+3. Переименуйте `.env.dist` -> `.env`.
 
-6. Запуск:
+4. Установка зависимостей и запуск:
+
+<details>
+<summary>Через uv (рекомендуется)</summary>
+
+**Устанавливаем `uv` (если еще не установлен):**
+
+Linux:
+
+``` bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Windows:
+
+``` bash
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+**Запускаем:**
+
+``` sh
+uv run startup.py
+```
+
+</details>
+
+<details>
+<summary>Через requirements.txt</summary>
+
+1. Созаём и активируем виртуальное окружение:
+
+``` sh
+python3 -m venv venv
+. venv/bin/activate
+```
+
+> **ЗАМЕТКА**
+>
+> Вторая команда для Windows выглядит следющим образом:
+>
+> ```
+> .\venv\Scripts\Activate
+> ```
+
+2. Установка необходимых пакетов:
+
+``` sh
+pip install -r requirements.txt
+```
+
+3. Запуск:
 
 ``` sh
 python3 startup.py

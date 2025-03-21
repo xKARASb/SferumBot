@@ -1,12 +1,12 @@
 """Get attachments."""
 
-import requests
+from aiohttp import ClientSession
 from loguru import logger
 
 from .consts import V
 
 
-def get_attachments(access_token: str, pts: int) -> tuple:
+async def get_attachments(session: ClientSession, access_token: str, pts: int) -> tuple:
     """Get attachments."""
     body = {
         "extended": 1,
@@ -19,12 +19,12 @@ def get_attachments(access_token: str, pts: int) -> tuple:
         "v": V,
     }
 
-    req = requests.post(
+    async with session.post(
         "https://api.vk.me/method/messages.getLongPollHistory",
         data=body,
         params=query,
-        timeout=20,
-    ).json()
+    ) as r:
+        req = await r.json()
 
     logger.debug("[attachments] {}", req)
 

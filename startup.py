@@ -73,12 +73,10 @@ async def main() -> None:
 
     except KeyboardInterrupt:
         logger.info("Bot was stoped")
+        await bot.close()
 
     except Exception as e:
         logger.exception(e)
-
-    finally:
-        await bot.close()
 
 
 if __name__ == "__main__":

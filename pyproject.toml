@@ -1,4 +1,13 @@
-[tool.ruff.lint]
+[project]
+name = "sferum-bot"
+version = "0.1.2"
+dependencies = [
+    "aiogram==3.18.0",
+    "loguru==0.7.3",
+    "python-dotenv==1.0.1"
+]
+
+[tool.ruff]
 select = ["ALL"]
 ignore = [
     "BLE001", "PLR2004", "PLE0604"
