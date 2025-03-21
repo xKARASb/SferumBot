@@ -1,6 +1,10 @@
 # Python
+.venv
 venv
 __pycache__
+
+# uv
+uv.lock
 
 # .env
 .env
