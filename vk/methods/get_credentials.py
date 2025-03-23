@@ -24,13 +24,12 @@ async def get_credentials(
         "v": V,
     }
 
-    req = await session.post(
+    async with session.post(
         "https://api.vk.me/method/messages.getLongPollServer",
         data=body,
         params=query,
-        timeout=20,
-    )
-    req = await req.json()
+    ) as r:
+        req = await r.json()
 
     # Print log
     logger.debug(req)

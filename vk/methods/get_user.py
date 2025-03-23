@@ -21,14 +21,13 @@ async def get_user_credentials(
     }
 
     # Send the request
-    req = await session.get(
+    async with session.get(
         "https://web.vk.me/",
         params=query,
         cookies=cookies,
         allow_redirects=False,
-        timeout=20,
-    )
-    req = await req.json()
+    ) as r:
+        req = await r.json()
 
     # Print log
     logger.debug(req)
