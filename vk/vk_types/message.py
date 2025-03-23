@@ -1,6 +1,7 @@
 """Get msg."""
 
 from __future__ import annotations
+from loguru import logger
 
 import re
 from typing import TYPE_CHECKING, Self
@@ -22,7 +23,7 @@ async def validate_text(text: str) -> str:
     return "\n".join(text.split("<br>"))
 
 
-async def parse_attachments(session: ClientSession, attachments) -> list:
+async def parse_attachments(attachments) -> list:
     """Парсит вложения."""
     media = []
 
@@ -55,7 +56,7 @@ class Message:
         from_id: int,
         text: str,
         attachments,
-        conversation_message_id,
+        conversation_message_id: int,
         **kwargs,
     ) -> None:
         """Just async __init__."""
@@ -75,21 +76,23 @@ class Message:
             await self.__sender_full_name()
 
         if self.attachments:
-            self.media = await parse_attachments(self.session, self.attachments)
+            self.media = await parse_attachments(self.attachments)
 
         if self.fwd:
             await self.__parse_fwds()
 
         if self.fwd:
-            await self.__get_all_media(self.fwd)
+            await self.__get_all_media()
+        return self
 
-    async def __parse_fwds(self: Self) -> list:
+    async def __parse_fwds(self: Self) -> list[Self]:
         _msg = Message()
-        self.fwd = [
-            await _msg.async_init(
-                self.session, **msg, profiles=self.profiles,
-            ) for msg in self.fwd
+
+        self.fwd  = [
+            await _msg.async_init(self.session, **msg, profiles=self.profiles)
+            for msg in self.fwd
         ]
+        return self.fwd
 
     async def __sender_full_name(self: Self) -> None:
         for profile in self.profiles:
@@ -100,51 +103,53 @@ class Message:
 
     def __repr__(self: Self) -> str:
         sender = self.__dict__.get("full_name", self.sender_id)
-        string = f" from {sender}: {self.text}, chat id: {self.chat_id}"
+        string = f" from {sender}: {self.text}, chat id: {self.id}"
         if self.media:
             string += f", media: {self.media}"
         if self.fwd:
             string += f", fwds: {self.fwd}"
         return string
 
-    async def __get_all_media(self: Self, fwd) -> None:
-        media = []
+    async def __get_all_media(self: Self) -> list:
+        media = self.media
 
-        if fwd:
-            for a in fwd:
-                if a:
-                    media.extend(await Message.__get_all_media(self, a))
+        if self.fwd:
+            for attach in self.fwd:
+                media.extend(await Message.__get_all_media(attach))
 
-        self.media = media
+        return media
 
     async def get_tg_text(
-        self: Self, chat_title: str | None = "", fwd_depth: int | None = 1,
+        self: Self, chat_title: str | None = "", fwd_depth: int | None = 0,
     ) -> str:
         """Build telegram msg."""
         # Формируем сообщение
         text = "".join([
             "*",
             await markdown_escape(
-                f'{chat_title}{"\n" if chat_title else ""}{self.full_name}:',
+                f'{f"{chat_title}\n" if chat_title else ""}{self.full_name}:',
             ),
             "*",
-            await markdown_escape(f"\n{self.text}"),
+            await markdown_escape(f"{self.text}"),
         ])
 
         # Вложения (фото, видео, документы)  # noqa: ERA001
         if self.attachments:
-            text += "\n".join([
+            text += " ".join([
                 f"*{x[0]}*" if x[0] != "video" else f"[{x[0]}]({x[1]})"
                 for x in self.media
             ])
+            text += "\n"
 
         # Пересланные сообщения (forward)
         if self.fwd:
-            text += "\n".join([
-                await self.get_tg_text(
-                    msg, fwd_depth=fwd_depth + 1,
-                ) for msg in self.fwd
-            ])
+            x = [
+                    await msg.get_tg_text(
+                        msg.__dict__.get("chat_title", ""), fwd_depth=fwd_depth + 1,
+                    ) for msg in self.fwd
+                ]
+            logger.debug(x)
+            text += "".join(x)
 
         # Возвращаем текст сообщения
         return text

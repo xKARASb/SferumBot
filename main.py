@@ -48,8 +48,8 @@ async def main(
                     _message = await get_message(session, access_token, pts)
 
                     if _message.get("error"):
-                        access_token = get_user_credentials(cookie, session).access_token
-                        credentials = get_credentials(access_token)
+                        access_token = (await get_user_credentials(cookie, session)).access_token
+                        credentials = await get_credentials(access_token)
                         data["ts"] = credentials.ts
                         data["key"] = credentials.key
 
@@ -82,7 +82,7 @@ async def main(
             data["ts"] = req["ts"]
 
         elif is_failed == 2:
-            access_token = get_user_credentials(cookie).access_token
-            credentials = get_credentials(access_token)
+            access_token = (await get_user_credentials(cookie)).access_token
+            credentials = await get_credentials(access_token)
             data["ts"] = credentials.ts
             data["key"] = credentials.key
