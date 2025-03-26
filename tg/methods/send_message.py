@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from loguru import logger
 from aiogram import Bot
 from aiogram.types import InputMediaDocument, InputMediaPhoto
 
@@ -38,27 +39,30 @@ async def gen_tg_msg(msg: VkMessage) -> tuple[dict, callable]:
                     ),
                 )
 
-        types[next(iter(types.keys()))][0].caption = text
-        for i in types.values():
-            if len(i) > 1:
-                args = {"media": i}
-                command = Bot.send_media_group
-                commands.append((args, command))
-            else:
-                command = None
-                match i[0].type:
-                    case "document":
-                        command = Bot.send_document
-                    case "sticker":
-                        command = Bot.send_photo
-                    case "photo":
-                        command = Bot.send_photo
+        if all(x == "video" for x in types.keys()):  # noqa: SIM118
+            commands.append(({"text": text}, Bot.send_message))
+        else:
+            types[next(iter(types.keys()))][0].caption = text
+            for i in types.values():
+                if len(i) > 1:
+                    args = {"media": i}
+                    command = Bot.send_media_group
+                    commands.append((args, command))
+                else:
+                    command = None
+                    match i[0].type:
+                        case "document":
+                            command = Bot.send_document
+                        case "sticker":
+                            command = Bot.send_photo
+                        case "photo":
+                            command = Bot.send_photo
 
-                kwargs = {
-                    i[0].type: i[0].media,
-                    "caption": i[0].caption,
-                    }
-                commands.append((kwargs, command))
+                    kwargs = {
+                        i[0].type: i[0].media,
+                        "caption": i[0].caption,
+                        }
+                    commands.append((kwargs, command))
     else:
         commands.append(({"text": text}, Bot.send_message))
     return commands
