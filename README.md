@@ -148,6 +148,7 @@ pip install -r requirements.txt
 ``` sh
 python3 startup.py
 ```
+</details>
 
 # Обращение
 
