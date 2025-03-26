@@ -13,29 +13,6 @@ if TYPE_CHECKING:
 
 REFACTOR_REGEX = r"(?<!\\)(\\|_|\*|\[|\]|\(|\)|\~|`|>|#|\+|-|=|\||\{|\}|\.|\!)"
 
-# async def parse_attachments(attachments) -> list:
-#     """Парсит вложения."""
-#     media = []
-
-#     for attach in attachments:
-#         media_type = attach["type"]
-#         data = attach[media_type]
-
-#         if media_type == "photo":
-#             media.append((media_type, data["orig_photo"]["url"]))
-
-#         elif media_type == "doc":
-#             media.append((media_type, data["url"]))
-
-#         elif media_type == "sticker":
-#             media.append((media_type, f'https://vk.com/sticker/1-{data["sticker_id"]}-512b'))
-
-#         elif media_type == "video":
-#             media.append((media_type, data["player"]))
-
-#     return media
-
-
 class Message:
     """Get msg."""
 
@@ -47,7 +24,7 @@ class Message:
         text: str,
         attachments: list,
         conversation_message_id: int,
-        **kwargs,
+        **kwargs: dict,
     ) -> Self:
         """Just async __init__."""
         self.media = []

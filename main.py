@@ -1,12 +1,12 @@
 """Main cycle module."""
 
-from aiogram import Bot
 from loguru import logger
-from asyncio import sleep
+from aiogram import Bot
 from aiohttp import ClientSession
+from asyncio import sleep
 
-from tg.methods import send_message, send_error
 from vk.vk_types import EventMessage, Message
+from tg.methods import send_message, send_error
 from vk.methods import get_credentials, get_message, get_user_credentials
 
 
