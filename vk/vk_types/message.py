@@ -74,8 +74,8 @@ class Message:
             media_type = attach["type"]
             if parsers.get(media_type, False):
                 parsed = await parsers[media_type](attach[media_type])
-                if media_type == "doc" and len(parsed) == 2:
-                    media_type = "video"
+                if media_type == "doc":
+                    media_type = parsed[1]
                     parsed = parsed[0]
                 media.append(
                     (media_type, parsed),
@@ -94,12 +94,12 @@ class Message:
                 return BufferedInputFile(
                     req.content,
                     filename=attach["title"],
-                    )
+                    ), "doc"
             return BufferedInputFile(
                 "File is too large to upload to telegram",
                 filename="file is too large.txt",
-            )
-        return attach["url"]
+            ), "doc"
+        return attach["url"], "doc"
 
     @staticmethod
     async def __get_max_size_photo_url(attach: dict) -> str:
