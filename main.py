@@ -89,8 +89,8 @@ async def main(
                 data["ts"] = req["ts"]
 
             elif is_failed == 2:
-                access_token = (await get_user_credentials(cookie)).access_token
-                credentials = await get_credentials(access_token)
+                access_token = (await get_user_credentials(cookie, session)).access_token
+                credentials = await get_credentials(access_token, session)
                 data["ts"] = credentials.ts
                 data["key"] = credentials.key
         except Exception as e:
