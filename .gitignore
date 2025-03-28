@@ -15,3 +15,6 @@ uv.lock
 
 # Logs
 *.log
+
+# pyenv
+.python-version

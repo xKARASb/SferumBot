@@ -9,7 +9,7 @@ async def send_error(
 ) -> None:
     """Send error notify to telegram."""
     await bot.send_message(
-        text="Сообщение из сферума не смогло обработаться\.\.\.",
+        text="Сообщение из сферума не смогло обработаться\\.\\.\\.",
         chat_id=tg_chat_id,
         message_thread_id=tg_topic_id,
     )
