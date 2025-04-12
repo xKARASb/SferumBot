@@ -1,0 +1,15 @@
+services:
+  sferum-bot:
+    image: xkarasb/sferum-bot:latest
+    container_name: sferum-bot
+    restart: unless-stopped
+    working_dir: /SferumBot
+    environment:
+      - AUTH_COOKIE=vk1.a.
+      - BOT_TOKEN=token
+      - TG_USER_ID=0000000000
+      - TG_CHAT_ID=0000000000
+      - VK_CHAT_ID=0000000000
+    command: |
+      sh -c "pip install --no-cache-dir -r requirements.txt &&
+             python3 startup.py"
