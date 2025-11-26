@@ -1,0 +1,1 @@
+"""Max Messenger API module."""

@@ -1,3 +1,1 @@
-"""Just init file."""
-
-from .bot import start_polling
+"""Telegram bot module."""

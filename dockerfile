@@ -13,4 +13,4 @@ COPY . .
 ENV PATH="/venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1
 
-CMD ["python", "startup.py"]
+CMD ["python", "run_bot_background.py"]
