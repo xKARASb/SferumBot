@@ -18,3 +18,5 @@ uv.lock
 
 # pyenv
 .python-version
+cache
+/cache/
